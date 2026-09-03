@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.vite/
+
+# editor and OS noise
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Source teaching documents.
+# These are the author's own lesson materials, and this repository is public.
+# Remove these four lines to publish them alongside the code.
+*.docx
+*.pdf
+
+# python
+__pycache__/
+*.pyc

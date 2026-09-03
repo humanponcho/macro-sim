@@ -1,0 +1,16 @@
+{
+  "name": "macro-sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A quarterly teaching engine and interactive lesson for the 10-layer model of the global economy.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "test:watch": "node --test --watch \"test/**/*.test.js\"",
+    "golden": "python3 tools/generate_golden.py"
+  }
+}

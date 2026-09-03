@@ -1,0 +1,39 @@
+{
+  "comment": "Scenario tapes shared by tools/generate_golden.py (Python oracle) and test/engine.golden.test.js (JavaScript port). A tape entry applies at the start of its quarter and then persists.",
+  "quarters": 8,
+  "scenarios": [
+    {
+      "id": "baseline",
+      "name": "Baseline, no inputs",
+      "policyMode": "manual",
+      "tape": []
+    },
+    {
+      "id": "hike_held",
+      "name": "Policy rate +1pp at Q1, held (spec 9)",
+      "policyMode": "manual",
+      "tape": [{ "quarter": 1, "policyRate": 4.5 }]
+    },
+    {
+      "id": "oil_held",
+      "name": "Energy supply +10 at Q1, held (spec 10)",
+      "policyMode": "manual",
+      "tape": [{ "quarter": 1, "energySupplyGap": 10.0 }]
+    },
+    {
+      "id": "hike_reversed",
+      "name": "Policy rate +1pp at Q1, back to 3.50 at Q3 (test T6)",
+      "policyMode": "manual",
+      "tape": [
+        { "quarter": 1, "policyRate": 4.5 },
+        { "quarter": 3, "policyRate": 3.5 }
+      ]
+    },
+    {
+      "id": "oil_taylor",
+      "name": "Energy supply +10 at Q1, central bank on a rule (spec 8)",
+      "policyMode": "taylor",
+      "tape": [{ "quarter": 1, "energySupplyGap": 10.0 }]
+    }
+  ]
+}
