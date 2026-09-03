@@ -16,15 +16,16 @@ separate countries, property and gold.
 
 ## Status
 
-Phase 1 of the build plan is complete: the engine is ported and tested. There is
-no user interface yet, by design. The specification requires the acceptance
-tests to pass before any screen is built.
+Phases 1 and 2 of the build plan are complete: the engine is ported, tested, and
+now reports why each variable moved and where the delayed ones are heading.
+There is no user interface yet, by design. The snapshot contract is frozen, so
+lesson content can safely be written against it.
 
 | Phase | What | State |
 | ----- | ---- | ----- |
-| 0 | Project setup, lesson content extracted from the source documents | Partly done. Setup is in place; the lesson text is not extracted yet. |
+| 0 | Project setup, lesson content extracted from the source documents | Partly done. Setup is in place. Lesson text waits for the frozen snapshot, which now exists. |
 | 1 | Engine port, golden tests, acceptance tests T0–T10, `NaN` guard | **Done** |
-| 2 | Target values, per-link contributions, replay-based step back | Not started |
+| 2 | Target values, per-link contributions, replay-based step back | **Done** |
 | 3 | The Simulate screen | Not started |
 | 4 | The layer map and shock cards | Not started |
 | 5 | Activities, assessment, teacher mode | Not started |
@@ -37,12 +38,16 @@ No dependencies to install. Node 18 or newer.
 npm test
 ```
 
-That runs three suites:
+That runs four suites:
 
 - **Golden files.** Replays five scenarios through the JavaScript engine and
   compares every number with the Python reference calculator, to `1e-9`.
 - **Acceptance.** The eleven behavioural tests from section 11 of the
   specification, plus bounds and immutability checks.
+- **Attribution.** Proves the contributions add up to the current for every
+  variable in every quarter of every scenario, checks the targets against the
+  spec formulas written out with literals, and checks that stepping back
+  reproduces an independent shorter run.
 - **Coefficients.** Asserts that every beta, sign, lag and width in the code
   still matches `macrosim_model_v1.json`.
 
@@ -63,6 +68,7 @@ src/engine/
 test/
   engine.golden.test.js        JavaScript against the Python oracle.
   engine.acceptance.test.js    T0-T10 from the specification.
+  engine.attribution.test.js   Targets, contributions and step back.
   model.coefficients.test.js   Guards against coefficient drift.
   golden/scenarios.json        Scenario tapes, shared by both languages.
   golden/*.csv                 Generated. Do not edit by hand.
@@ -116,6 +122,81 @@ The point of the lag structure is that a rate rise moves markets immediately and
 the real economy only later. There is deliberately **no direct policy-rate term
 in the growth equation**. Rates reach growth through credit, energy and wealth,
 which is what the lesson says out loud.
+
+## What a snapshot carries
+
+Each quarter produces one snapshot. The eight currents are the levels. The rest
+exists so a screen can explain them.
+
+```js
+{
+  quarter: 1,
+
+  // the eight currents, plus expectations and the inputs that produced them
+  growth: 2, inflation: 2, policyRate: 4.5, treasuryYield: 4.362,
+  dollar: 102.14, credit: 100, energy: 99.251, equity: 94.393,
+  gExp: 1.7, piExp: 1.805,
+  energySupplyGap: 0, policyMode: "manual",
+
+  // where the delayed variables are heading
+  target: { credit: 95.57, growth: 1.94, inflation: 1.80, energy: 99.25 },
+
+  // why each variable is where it is
+  contributions: {
+    equity: { y_to_eq: -3.372, gexp_to_eq: -2.4, cred_to_eq: 0, e_to_eq: 0.165 },
+    // ...and the same for treasuryYield, dollar, credit, growth,
+    //    inflation, energy, gExp and piExp
+  }
+}
+```
+
+### Contributions
+
+Every equation in the model is linear, so each level splits **exactly** into one
+contribution per link. There is no approximation and nothing to recompute:
+
+```js
+BASELINE[variable] + sum(snapshot.contributions[variable]) === snapshot[variable]
+```
+
+So "why did equity move?" is `Object.entries(snapshot.contributions.equity)`.
+In the quarter of a rate rise, the answer reads: the discount rate took 3.37
+points, weaker growth expectations took 2.40 more, cheaper energy gave back
+0.16, and **credit contributed nothing at all** — because the credit link has a
+lag of one quarter. That single zero is the whole lesson about lags.
+
+One caveat: the contributions describe the equation *before* clipping. If a
+bound binds, the sum reports the level the equation asked for, not the clipped
+current.
+
+### Targets
+
+A target is the level a delayed variable would reach if today's drivers never
+moved again and every lag had fully landed. It is the same equation with lag 0
+and width 1, read off this tick's currents.
+
+Only the four delayed variables have one. The markets are already at their level
+equation, so a target would just repeat the current.
+
+The distance between current and target is what a lag looks like on screen. In
+the quarter of a rate rise, credit still reads 100 while its target is already
+95.6. Nothing has happened yet, and something certainly will. Hold the same rate
+for eight quarters and the two meet: 94.65 against 94.63.
+
+Targets are not clipped to the bounds. Clamp them for display if you draw a
+meter.
+
+### Stepping back
+
+Stepping back replays the tape. It never inverts the arithmetic, and it adds no
+state:
+
+```js
+stepBack(tape, currentQuarter)  // === runTape(tape, { quarters: currentQuarter - 1 })
+```
+
+The tape is the source of truth. The history arrays stay an implementation
+detail inside `simulateQuarter`.
 
 ## Source documents
 

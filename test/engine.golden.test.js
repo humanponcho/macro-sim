@@ -40,6 +40,19 @@ function readGolden(id) {
   });
 }
 
+/** Visit every number in a snapshot, including target and contributions. */
+function walkNumbers(node, visit, path = "") {
+  for (const [key, value] of Object.entries(node)) {
+    const here = path ? `${path}.${key}` : key;
+    if (value === null || typeof value === "string") continue;
+    if (typeof value === "object") {
+      walkNumbers(value, visit, here);
+    } else {
+      visit(here, value);
+    }
+  }
+}
+
 describe("JavaScript port matches the Python oracle", () => {
   for (const scenario of config.scenarios) {
     test(scenario.name, () => {
@@ -87,13 +100,12 @@ describe("no NaN reaches a snapshot", () => {
       });
 
       for (const snapshot of snapshots) {
-        for (const [key, value] of Object.entries(snapshot)) {
-          if (typeof value === "string") continue;
+        walkNumbers(snapshot, (path, value) => {
           assert.ok(
             Number.isFinite(value),
-            `${scenario.id} Q${snapshot.quarter}: ${key} is ${value}`,
+            `${scenario.id} Q${snapshot.quarter}: ${path} is ${value}`,
           );
-        }
+        });
       }
     });
   }
