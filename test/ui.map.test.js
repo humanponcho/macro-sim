@@ -24,6 +24,7 @@ import {
   ENGINE_INPUTS,
 } from "../src/ui/map.js";
 import { stageEntry, effectiveInputs } from "../src/ui/tape.js";
+import { formatValue } from "../src/display/format.js";
 
 const load = (name) =>
   JSON.parse(readFileSync(new URL(`../content/${name}`, import.meta.url), "utf8"));
@@ -178,6 +179,55 @@ describe("the three activity states", () => {
       const map = buildMap(content, hike[q - 1], hike[q - 2] ?? null);
       for (const tile of map) {
         assert.ok(["quiet", "moving", "inFlight"].includes(tile.activity));
+      }
+    }
+  });
+});
+
+describe("the map agrees with the printed digits", () => {
+  test("no tile claims in flight when every printed pair is equal", () => {
+    // The pipeline meter and the map must never contradict each other, and
+    // neither may claim a move the reader cannot see on screen.
+    const delayed = ["credit", "growth", "inflation", "energy"];
+
+    for (const card of content.experiments) {
+      const path = runTape(card.tape, {
+        quarters: card.quarters,
+        policyMode: card.policyMode,
+      });
+
+      for (let i = 0; i < path.length; i += 1) {
+        const snapshot = path[i];
+
+        for (const tile of buildMap(content, snapshot, path[i - 1] ?? null)) {
+          if (tile.activity !== "inFlight") continue;
+
+          const travelling = tile.variables
+            .filter((id) => delayed.includes(id))
+            .some(
+              (id) =>
+                formatValue(id, snapshot[id]) !== formatValue(id, snapshot.target[id]),
+            );
+
+          assert.ok(
+            travelling,
+            `${card.id} Q${i + 1} L${tile.number} claims in flight with nothing to travel`,
+          );
+        }
+      }
+    }
+  });
+
+  test("layer 6 in flight tracks the printed credit digits exactly", () => {
+    for (let i = 0; i < hike.length; i += 1) {
+      const snapshot = hike[i];
+      const tile = buildMap(content, snapshot, hike[i - 1] ?? null).find((t) => t.number === 6);
+      const differ =
+        formatValue("credit", snapshot.credit) !==
+        formatValue("credit", snapshot.target.credit);
+
+      if (!differ) {
+        assert.notEqual(tile.activity, "inFlight", `Q${i + 1}: 100.0 heading for 100.0`);
       }
     }
   });

@@ -30,6 +30,12 @@ lesson content can safely be written against it.
 | 4 | The layer map and shock cards | **Done** |
 | 5 | Glossary drawer, card questions, exit ticket | **Done** |
 
+## Before a class
+
+`npm test` verifies the logic and the content against a document stub. It
+proves nothing about layout, focus or pointer behaviour. [CHECKLIST.md](CHECKLIST.md)
+is the short walk to do on the real page before this meets a room.
+
 ## Running the app
 
 No dependencies to install, and no build step. Node 18 or newer for the tests;

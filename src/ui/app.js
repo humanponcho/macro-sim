@@ -155,6 +155,8 @@ function createApp(content) {
   }
 
   function slider(key, config) {
+    const readout = el("output", { class: "control__value", text: String(state[key]) });
+
     return el("label", { class: "control" }, [
       el("span", { class: "control__label", text: config.label }),
       el("span", { class: "control__row" }, [
@@ -165,13 +167,21 @@ function createApp(content) {
           step: config.step,
           value: state[key],
           "aria-label": config.label,
+          // While the thumb is moving, update the state and the readout in
+          // place. Do NOT redraw: draw() replaces the whole tree, which
+          // destroys this input under the pointer and stops the drag dead.
+          // Nothing else on screen depends on this value until the next
+          // quarter is run, so there is nothing else to update.
           oninput: (event) => {
             takeTheWheel();
             state[key] = Number(event.target.value);
-            draw();
+            readout.textContent = String(state[key]);
           },
+          // Released, or committed from the keyboard. Now it is safe to redraw,
+          // which is what picks up the end of a card being played.
+          onchange: () => draw(),
         }),
-        el("output", { class: "control__value", text: String(state[key]) }),
+        readout,
       ]),
       el("span", { class: "control__help", text: config.help }),
     ]);
