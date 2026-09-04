@@ -26,13 +26,23 @@ lesson content can safely be written against it.
 | 0 | Project setup, lesson content extracted from the source documents | **Done** |
 | 1 | Engine port, golden tests, acceptance tests T0–T10, `NaN` guard | **Done** |
 | 2 | Target values, per-link contributions, replay-based step back | **Done** |
-| 3 | The Simulate screen | Not started |
+| 3 | The Simulate screen | **Done** |
 | 4 | The layer map and shock cards | Not started |
 | 5 | Activities, assessment, teacher mode | Not started |
 
-## Running the tests
+## Running the app
 
-No dependencies to install. Node 18 or newer.
+No dependencies to install, and no build step. Node 18 or newer for the tests;
+any static server for the page.
+
+```bash
+npm start
+```
+
+Then open http://localhost:8000. The page is plain ES modules, so it needs to be
+served rather than opened straight off the disk.
+
+## Running the tests
 
 ```bash
 npm test
@@ -57,6 +67,11 @@ That runs four suites:
   label, every one of the 31 links has a bar label, every layer places its
   variables, and every figure quoted in a teacher line is checked against the
   live engine.
+- **View model.** The screen's decisions, tested without a browser.
+- **Render.** The DOM layer against a small document stub, proving no
+  `undefined`, `NaN` or signed zero reaches any panel of any card.
+- **Tape.** Editing the run, including that playing a shock card never
+  rewrites it.
 
 To regenerate the golden files after a deliberate change to the reference
 calculator:
@@ -75,12 +90,24 @@ src/engine/
 src/display/
   format.js         Rounding, signed zero, target clamping, ranking. No economics.
 
+src/ui/
+  viewmodel.js      Snapshot plus content, turned into rows. Pure, so it is tested.
+  render.js         The DOM layer. Walks those rows, makes no decisions.
+  tape.js           Editing the run. Pure, so it is tested.
+  app.js            State and events.
+  styles.css        Built to be projected: large type, high contrast.
+
+index.html          The Simulate screen.
+
 test/
   engine.golden.test.js        JavaScript against the Python oracle.
   engine.acceptance.test.js    T0-T10 from the specification.
   engine.attribution.test.js   Targets, contributions and step back.
   display.format.test.js       The display invariants.
   content.contract.test.js     Lesson copy against the engine.
+  ui.viewmodel.test.js         What the screen decides.
+  ui.render.test.js            The DOM layer, against a document stub.
+  ui.tape.test.js              Editing the run.
   model.coefficients.test.js   Guards against coefficient drift.
   golden/scenarios.json        Scenario tapes, shared by both languages.
   golden/*.csv                 Generated. Do not edit by hand.
@@ -261,6 +288,40 @@ hike_held Q1 equity.y_to_eq: card says -3.9, engine says -3.372
 
 That check runs over every figure quoted in `experiments.json`, so a teacher can
 read the card aloud and trust it.
+
+## The screen
+
+One screen so far: Simulate. It renders the snapshot and the strings, and holds
+no economics of its own.
+
+- **The eight currents**, in the lesson's own order, each with its change since
+  last quarter. An unmoved tile says "no change" rather than showing a bare
+  zero.
+- **Expected against printed.** In the quarter of a rate rise, expected growth
+  reads 1.70 while printed growth still reads 2.00. That is why shares can fall
+  on a day when no figure has been published.
+- **The pipeline.** Current against target for the four delayed variables.
+  Credit reads 100.0 heading for 95.6, with the meter empty. Whether a variable
+  is still moving is decided at display precision: if the two print the same
+  number, the screen does not claim a move the reader cannot see.
+- **Why did this move?** One bar per link, largest absolute effect first, zeros
+  kept. Pick any of the nine computed variables.
+
+The banner is derived, not hard-coded to quarter one. It shows whenever markets
+have moved and the real economy has not yet followed, so an energy shock earns
+the same line as a rate rise, and it is withdrawn the moment credit starts to
+move.
+
+Space advances a quarter and Backspace steps back, so a lesson can be driven
+from the back of a room.
+
+### Driving against playing
+
+There are two ways to run the model and they must not fight. **Driving**: you
+move the controls, and each advance records what changed. **Playing**: a shock
+card supplies the whole tape, and advancing reveals the next quarter. Touching a
+control takes the wheel back, keeping the quarters already seen and dropping the
+rest of the card.
 
 ## Source documents
 

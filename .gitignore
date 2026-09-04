@@ -20,3 +20,6 @@ dist/
 # python
 __pycache__/
 *.pyc
+
+# local tool config
+.claude/

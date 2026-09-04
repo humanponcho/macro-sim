@@ -11,6 +11,7 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.js\"",
     "test:watch": "node --test --watch \"test/**/*.test.js\"",
-    "golden": "python3 tools/generate_golden.py"
+    "golden": "python3 tools/generate_golden.py",
+    "start": "python3 -m http.server 8000"
   }
 }
