@@ -28,7 +28,7 @@ lesson content can safely be written against it.
 | 2 | Target values, per-link contributions, replay-based step back | **Done** |
 | 3 | The Simulate screen | **Done** |
 | 4 | The layer map and shock cards | **Done** |
-| 5 | Activities, assessment, teacher mode | Not started |
+| 5 | Glossary drawer, card questions, exit ticket | **Done** |
 
 ## Running the app
 
@@ -74,6 +74,8 @@ That runs four suites:
   rewrites it.
 - **Map.** Every engine id a layer claims resolves, spoken layers hold no
   controls, and selecting a layer changes no input.
+- **Study.** The glossary has no dangling cross-reference, and every exit-ticket
+  question names a real readout or a real layer.
 
 To regenerate the golden files after a deliberate change to the reference
 calculator:
@@ -95,6 +97,7 @@ src/display/
 src/ui/
   viewmodel.js      Snapshot plus content, turned into rows. Pure, so it is tested.
   map.js            The layer map. Pure, and reads its mapping from layers.json.
+  study.js          The glossary drawer and the exit ticket. Pure.
   render.js         The DOM layer. Walks those rows, makes no decisions.
   tape.js           Editing the run. Pure, so it is tested.
   app.js            State and events.
@@ -112,6 +115,7 @@ test/
   ui.render.test.js            The DOM layer, against a document stub.
   ui.tape.test.js              Editing the run.
   ui.map.test.js               The layer map and the cards.
+  ui.study.test.js             The glossary and the exit ticket.
   model.coefficients.test.js   Guards against coefficient drift.
   golden/scenarios.json        Scenario tapes, shared by both languages.
   golden/*.csv                 Generated. Do not edit by hand.
@@ -374,6 +378,30 @@ wrong answer teaches rather than hides.
 
 If a card needs a line at a quarter it does not have, the key goes in
 `experiments.json`, never in the renderer.
+
+## The study aids
+
+**The glossary drawer** opens from anywhere. Terms are cross-referenced, and a
+term tied to a readout offers to show it on screen rather than describe it
+again: a student reading "yield" can be sent to the tile where it is moving. A
+term with no engine home says so instead of pretending to have one.
+
+**The exit ticket** is five questions in `copy.json`: which variable has already
+moved in the shock quarter, the inverse bond rule, two layer placements, and one
+open question for a teacher to read aloud.
+
+Two rules run through it. **A wrong answer is never simply marked wrong** — the
+reason is shown either way, because a cross teaches nothing. And **an open
+question is never marked at all**; it reveals its model answer on request.
+
+The same rule reaches the cards. `askTheClass` appears when a run finishes, but
+`answer` is held behind a reveal, so the room gets to think first.
+
+The ticket is checked against the model it is testing. The question "which of
+these has already moved?" only works if equity really has moved while credit and
+growth have not, so a test asserts exactly that against the engine. The question
+placing unemployment on layer 5 only works if layer 5 admits it does not
+simulate jobs, so a test asserts that too.
 
 ## Source documents
 

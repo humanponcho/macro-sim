@@ -249,3 +249,61 @@ button.layer__button:hover { border-color: var(--accent); }
 .layer--quiet .layer__button { background: var(--surface); }
 .layer__var--input { border-style: dashed; }
 .banner--baseline, .banner--rule { border-left-color: var(--accent); }
+/* These three keep the base treatment on purpose: a moving meter, an answered
+   question and a flat tile are already legible without extra decoration. */
+.meter--moving, .ticket__q--answered, .tile--flat { }
+
+/* --- glossary drawer --- */
+.nav__drawer { margin-left: auto; font: inherit; font-weight: 600; padding: .5rem .9rem;
+  border: 1px solid var(--rule); border-radius: 6px; background: var(--surface);
+  color: var(--ink); cursor: pointer; align-self: center; }
+.nav__drawer:hover { border-color: var(--accent); color: var(--accent); }
+.nav__drawer[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+.drawer { position: sticky; bottom: 0; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 1rem 1.1rem; max-height: 26rem; overflow-y: auto;
+  box-shadow: 0 -4px 24px -12px rgba(13,35,64,.4); }
+.drawer__head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.drawer__title { margin: 0; font-size: 1.05rem; }
+.drawer__search { display: flex; flex-direction: column; gap: .25rem; margin: .7rem 0 .9rem; }
+.drawer__search input { font: inherit; padding: .45rem .6rem; border-radius: 6px;
+  border: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
+.drawer__list { margin: 0; display: grid; grid-template-columns: minmax(9rem, 12rem) 1fr;
+  gap: .5rem .9rem; align-items: baseline; }
+.drawer__term { font-weight: 600; font-size: .9rem; display: flex; flex-direction: column;
+  gap: .15rem; align-items: flex-start; }
+.drawer__meaning { margin: 0; font-size: .88rem; color: var(--ink-soft);
+  display: flex; flex-direction: column; gap: .2rem; }
+.drawer__watch, .drawer__ref { font: inherit; font-size: .72rem; padding: 0; border: none;
+  background: none; color: var(--accent); cursor: pointer; text-align: left;
+  text-decoration: underline; }
+.drawer__seealso { font-size: .78rem; display: flex; flex-wrap: wrap; gap: .35rem;
+  align-items: baseline; }
+
+/* --- exit ticket --- */
+.panel--ticket { border-left: 4px solid var(--ink); }
+.ticket__score { font-size: .8rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.ticket { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;
+  gap: .8rem; counter-reset: q; }
+.ticket__q { border: 1px solid var(--rule); border-left: 3px solid var(--rule);
+  border-radius: 6px; padding: .75rem .85rem; }
+.ticket__q--right { border-left-color: var(--rise); }
+.ticket__q--wrong { border-left-color: var(--fall); }
+.ticket__ask { margin: 0 0 .6rem; font-weight: 600; font-size: .95rem; }
+.ticket__options { display: flex; flex-wrap: wrap; gap: .35rem; }
+.ticket__option { font: inherit; font-size: .85rem; padding: .35rem .7rem; border-radius: 5px;
+  border: 1px solid var(--rule); background: var(--surface); color: var(--ink-soft);
+  cursor: pointer; text-align: left; }
+.ticket__option:hover { border-color: var(--accent); color: var(--accent); }
+.ticket__option--chosen { background: var(--ink); border-color: var(--ink); color: #fff; }
+.ticket__answer { margin-top: .65rem; padding-top: .55rem; border-top: 1px dashed var(--rule); }
+.ticket__verdict { margin: 0 0 .3rem; font-size: .9rem; }
+.ticket__because { margin: 0; font-size: .85rem; color: var(--ink-soft); }
+.ticket__closing { margin: 1rem 0 .6rem; font-size: .95rem; font-weight: 600;
+  padding: .7rem .9rem; background: var(--accent-soft); border-radius: 6px; }
+.card__answer { margin: .5rem 0 0; font-size: .9rem; color: var(--ink-soft); }
+
+@media (max-width: 40rem) {
+  .drawer__list { grid-template-columns: 1fr; gap: .15rem; }
+  .drawer__meaning { margin-bottom: .5rem; }
+}

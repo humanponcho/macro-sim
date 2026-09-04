@@ -74,5 +74,71 @@
   "footer": {
     "disclaimer": "Teaching magnitudes, chosen to make transmission visible over six to eight quarters. They are not estimates and this is not a forecast.",
     "outOfScope": "Deliberately left out: fiscal policy, employment, separate countries, property, gold, a yield curve, and random shocks."
+  },
+  "glossaryDrawer": {
+    "title": "Glossary",
+    "open": "Glossary",
+    "close": "Close",
+    "searchLabel": "Find a term",
+    "searchPlaceholder": "Type a word…",
+    "empty": "No term matches that. Try a shorter word.",
+    "seeAlso": "See also",
+    "showsOnScreen": "You can watch this one on screen"
+  },
+  "exitTicket": {
+    "title": "Exit ticket",
+    "prompt": "Five questions before you leave. Answer first, then reveal.",
+    "revealLabel": "Show the answer",
+    "hideLabel": "Hide the answer",
+    "scoreLabel": "Answered",
+    "resetLabel": "Start the ticket again",
+    "closing": "You do not need to forecast the economy. You need a map, and to ask which layer moved first.",
+    "questions": [
+      {
+        "id": "moved_first",
+        "ask": "The central bank raises the rate today. By the end of this quarter, which of these has already moved?",
+        "kind": "variable",
+        "options": [
+          "equity",
+          "credit",
+          "growth"
+        ],
+        "answer": "equity",
+        "because": "Markets reprice in the same quarter. Credit reads the previous quarter, so it cannot have moved, and growth is further down the chain still."
+      },
+      {
+        "id": "bond_rule",
+        "ask": "Yields rise. What happens to the price of a bond someone already holds?",
+        "kind": "choice",
+        "options": [
+          "It rises",
+          "It falls",
+          "It does not change"
+        ],
+        "answer": "It falls",
+        "because": "New bonds now pay more, so an older one paying less is worth less. Say it until it is boring: yields up, prices down."
+      },
+      {
+        "id": "place_drought",
+        "ask": "A drought ruins a grain harvest. Which layer does that start in?",
+        "kind": "layer",
+        "answer": 2,
+        "because": "It is a physical supply shock. It starts in energy and resources, then travels up as costs."
+      },
+      {
+        "id": "place_jobs",
+        "ask": "Unemployment jumps. Which layer is its home, even though the model does not compute it?",
+        "kind": "layer",
+        "answer": 5,
+        "because": "Labour, income and consumption. The model simulates growth and inflation there, but jobs and wages are spoken, not computed."
+      },
+      {
+        "id": "why_slow",
+        "ask": "Why does a rate rise not slow growth in the quarter it happens?",
+        "kind": "open",
+        "answer": "Because there is no direct line from the rate to growth. It travels through credit, energy and wealth, and each of those takes a quarter to start and several to finish.",
+        "because": "This is the whole lesson. The rate moves markets today and the real economy over the following year."
+      }
+    ]
   }
 }

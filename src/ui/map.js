@@ -147,8 +147,10 @@ export function buildMap(content, snapshot = null, previous = null, selected = n
       // A layer that leaves something out must say so on its face, so a
       // student never mistakes silence for "the model handled it".
       notSimulated: layer.notSimulated ?? [],
-      omission:
-        layer.mode === "simulated" ? null : omissionSentence(layer, content),
+      // The badge comes from mode; the omission sentence comes from what the
+      // layer actually leaves out. They are separate questions. Layer 9 is
+      // simulated and still owes the class a word about housing and gold.
+      omission: omissionSentence(layer, content),
       plain: layer.plain,
       analogy: layer.analogy,
       watch: layer.watch,

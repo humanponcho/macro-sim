@@ -313,6 +313,59 @@ describe("glossary.json and copy.json line up with the engine", () => {
   });
 });
 
+describe("the exit ticket and drawer are keyed to the engine", () => {
+  const copy = read("copy.json");
+  const layers = collection(read("layers.json"), "layers");
+  const variables = collection(read("variables.json"), "variables");
+
+  test("the drawer has every string it renders", () => {
+    for (const key of [
+      "title", "open", "close", "searchLabel", "searchPlaceholder",
+      "empty", "seeAlso", "showsOnScreen",
+    ]) {
+      assert.ok(copy.glossaryDrawer[key], `glossaryDrawer.${key} is missing`);
+    }
+  });
+
+  test("the ticket has every string it renders", () => {
+    for (const key of ["title", "prompt", "revealLabel", "hideLabel", "scoreLabel", "resetLabel", "closing"]) {
+      assert.ok(copy.exitTicket[key], `exitTicket.${key} is missing`);
+    }
+  });
+
+  test("a question that names a variable names a real readout", () => {
+    for (const question of copy.exitTicket.questions) {
+      if (question.kind !== "variable") continue;
+
+      for (const id of question.options) {
+        assert.ok(variables[id], `${question.id} offers unknown variable "${id}"`);
+      }
+      assert.ok(
+        question.options.includes(question.answer),
+        `${question.id}: the answer is not among its options`,
+      );
+    }
+  });
+
+  test("a question that names a layer names one the map has", () => {
+    for (const question of copy.exitTicket.questions) {
+      if (question.kind !== "layer") continue;
+      assert.ok(
+        layers.some((layer) => layer.number === question.answer),
+        `${question.id} answers with layer ${question.answer}, which does not exist`,
+      );
+    }
+  });
+
+  test("every question gives a reason, right or wrong", () => {
+    for (const question of copy.exitTicket.questions) {
+      assert.ok(question.ask, `${question.id} asks nothing`);
+      assert.ok(question.because, `${question.id} explains nothing`);
+      assert.ok(question.answer !== undefined, `${question.id} has no answer`);
+    }
+  });
+});
+
 describe("reconciliation.md maps the beginner chain onto the ten layers", () => {
   const text = read("reconciliation.md");
 

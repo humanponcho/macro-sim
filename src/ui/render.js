@@ -324,8 +324,156 @@ export function renderCard(card, view, copy, variables) {
       ? el("div", { class: "cues" }, [
           el("h3", { class: "cues__title", text: "Ask the class" }),
           el("p", { class: "panel__lead", text: card.askTheClass }),
-          el("p", { class: "panel__note", text: card.answer }),
+          // The answer is held back, so the room gets to think first.
+          view.answerShown
+            ? el("p", { class: "card__answer", text: card.answer })
+            : el("button", {
+                type: "button",
+                class: "button",
+                text: copy.exitTicket.revealLabel,
+                onclick: view.onRevealAnswer,
+              }),
         ])
       : null,
+  ]);
+}
+
+/* --- phase 5: glossary drawer and exit ticket --- */
+
+export function renderGlossary(glossary, copy, handlers) {
+  const strings = copy.glossaryDrawer;
+
+  return el("aside", { class: "drawer", role: "dialog", "aria-label": strings.title }, [
+    el("div", { class: "drawer__head" }, [
+      el("h2", { class: "drawer__title", text: strings.title }),
+      el("button", {
+        type: "button",
+        class: "button",
+        text: strings.close,
+        onclick: handlers.onClose,
+      }),
+    ]),
+    el("label", { class: "drawer__search" }, [
+      el("span", { class: "control__label", text: strings.searchLabel }),
+      el("input", {
+        type: "search",
+        placeholder: strings.searchPlaceholder,
+        value: glossary.query,
+        oninput: (event) => handlers.onSearch(event.target.value),
+      }),
+    ]),
+    glossary.empty
+      ? el("p", { class: "panel__note", text: strings.empty })
+      : el(
+          "dl",
+          { class: "drawer__list" },
+          glossary.entries.flatMap((entry) => [
+            el("dt", { class: "drawer__term" }, [
+              el("span", { text: entry.term }),
+              entry.onScreen
+                ? el("button", {
+                    type: "button",
+                    class: "drawer__watch",
+                    text: strings.showsOnScreen,
+                    onclick: () => handlers.onWatch(entry.variable),
+                  })
+                : null,
+            ]),
+            el("dd", { class: "drawer__meaning" }, [
+              el("span", { text: entry.plain }),
+              entry.seeAlso.length
+                ? el("span", { class: "drawer__seealso" }, [
+                    el("span", { text: `${strings.seeAlso}: ` }),
+                    ...entry.seeAlso.map((ref) =>
+                      el("button", {
+                        type: "button",
+                        class: "drawer__ref",
+                        text: ref.term,
+                        onclick: () => handlers.onSearch(ref.term),
+                      }),
+                    ),
+                  ])
+                : null,
+            ]),
+          ]),
+        ),
+  ]);
+}
+
+export function renderExitTicket(ticket, copy, handlers) {
+  const strings = copy.exitTicket;
+
+  return el("section", { class: "panel panel--ticket" }, [
+    el("div", { class: "panel__head" }, [
+      el("h2", { class: "panel__title", text: ticket.title }),
+      el("span", {
+        class: "ticket__score",
+        text: `${strings.scoreLabel} ${ticket.answered} of ${ticket.total}`,
+      }),
+    ]),
+    el("p", { class: "panel__lead", text: ticket.prompt }),
+
+    el(
+      "ol",
+      { class: "ticket" },
+      ticket.questions.map((question) =>
+        el(
+          "li",
+          {
+            class:
+              "ticket__q" +
+              (question.answered ? " ticket__q--answered" : "") +
+              (question.correct === true ? " ticket__q--right" : "") +
+              (question.correct === false ? " ticket__q--wrong" : ""),
+          },
+          [
+            el("p", { class: "ticket__ask", text: question.ask }),
+
+            question.options.length
+              ? el(
+                  "div",
+                  { class: "ticket__options" },
+                  question.options.map((option) =>
+                    el("button", {
+                      type: "button",
+                      class:
+                        "ticket__option" +
+                        (question.given === option.value ? " ticket__option--chosen" : ""),
+                      text: option.label,
+                      onclick: () => handlers.onAnswer(question.id, option.value),
+                    }),
+                  ),
+                )
+              : el("button", {
+                  type: "button",
+                  class: "button",
+                  text: question.revealed ? strings.hideLabel : strings.revealLabel,
+                  onclick: () => handlers.onReveal(question.id),
+                }),
+
+            question.revealed
+              ? el("div", { class: "ticket__answer" }, [
+                  question.markable
+                    ? el("p", { class: "ticket__verdict" }, [
+                        el("strong", {
+                          text: question.correct ? "Yes. " : "Not quite. ",
+                        }),
+                        document.createTextNode(`The answer is ${question.answerLabel}.`),
+                      ])
+                    : el("p", { class: "ticket__verdict", text: question.answer }),
+                  el("p", { class: "ticket__because", text: question.because }),
+                ])
+              : null,
+          ],
+        ),
+      ),
+    ),
+
+    ticket.complete
+      ? el("p", { class: "ticket__closing", text: ticket.closing })
+      : null,
+    el("div", { class: "actions" }, [
+      el("button", { class: "button", text: strings.resetLabel, onclick: handlers.onReset }),
+    ]),
   ]);
 }

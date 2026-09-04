@@ -6,7 +6,12 @@
       "title": "Demographics and geography",
       "mode": "discussed",
       "engineVariables": [],
-      "notSimulated": ["population", "ageing", "migration", "location of resources"],
+      "notSimulated": [
+        "population",
+        "ageing",
+        "migration",
+        "location of resources"
+      ],
       "plain": "How many people there are, how old they are, where they live, and what the land gives them. This layer changes over decades, and it sets the limits of what everything above it can do.",
       "analogy": "A village. If most people are over seventy there are fewer builders and more people needing care. If it sits on a river with good soil it can feed itself. If it sits in a desert with no port, trade is hard however clever the villagers are.",
       "watch": "Working-age population, birth rates, migration.",
@@ -16,8 +21,14 @@
       "number": 2,
       "title": "Energy and natural resources",
       "mode": "partial",
-      "engineVariables": ["energy"],
-      "notSimulated": ["metals", "food commodities", "the electricity mix"],
+      "engineVariables": [
+        "energy"
+      ],
+      "notSimulated": [
+        "metals",
+        "food commodities",
+        "the electricity mix"
+      ],
       "plain": "Almost everything in the physical economy burns, moves or stores energy. Energy is not one sector among many. It is an input to transport, manufacturing, food, heating and computing alike, so when it gets expensive, costs rise nearly everywhere.",
       "analogy": "If petrol doubles overnight, the delivery van, the farm tractor, the plastic in the packaging and the heating bill all get dearer. The bakery has a worse month even though nobody's taste in bread changed.",
       "watch": "Oil and gas prices, copper, food prices.",
@@ -29,7 +40,12 @@
       "title": "Production and supply chains",
       "mode": "discussed",
       "engineVariables": [],
-      "notSimulated": ["manufacturing", "productivity", "semiconductors", "shipping"],
+      "notSimulated": [
+        "manufacturing",
+        "productivity",
+        "semiconductors",
+        "shipping"
+      ],
       "plain": "Resources become products and services here: factories, farms, building sites, mines, software and shipping. Productivity lives in this layer. If the same worker produces more, growth and profits can rise without as much inflation.",
       "analogy": "A phone is not made in one place. Minerals are mined, chips are fabricated, screens are made, software is written, the device is assembled, then it ships. If one link snaps, the whole chain slows.",
       "watch": "Industrial production, factory orders, chip output.",
@@ -40,7 +56,12 @@
       "title": "International trade",
       "mode": "discussed",
       "engineVariables": [],
-      "notSimulated": ["trade volumes", "tariffs", "sanctions", "shipping costs"],
+      "notSimulated": [
+        "trade volumes",
+        "tariffs",
+        "sanctions",
+        "shipping costs"
+      ],
       "plain": "Countries swap what they are good at making. Trade is the plumbing between national production systems. When governments tax imports, block sales, or when ships cannot move, prices and availability change in the shops.",
       "analogy": "Your local supermarket is the last aisle of a global warehouse. If the warehouse is delayed, the shelf looks empty or the price jumps, even though the shop did nothing wrong.",
       "watch": "Container rates, trade balances, tariff announcements.",
@@ -50,8 +71,15 @@
       "number": 5,
       "title": "Labour, income and consumption",
       "mode": "partial",
-      "engineVariables": ["growth", "inflation"],
-      "notSimulated": ["employment", "wages", "consumer confidence"],
+      "engineVariables": [
+        "growth",
+        "inflation"
+      ],
+      "notSimulated": [
+        "employment",
+        "wages",
+        "consumer confidence"
+      ],
       "plain": "Production pays people, people spend, and that spending is someone else's revenue. Household spending is a large share of activity in most rich economies, which is why the consumer appears in every forecast.",
       "analogy": "A town with a busy factory pays good wages. The cafe opposite is full, so it hires another cook. The cook rents a flat. The landlord spends the rent at the hardware shop. One payroll becomes many receipts.",
       "watch": "Unemployment, wage growth, retail sales.",
@@ -62,8 +90,14 @@
       "number": 6,
       "title": "Savings, credit and investment",
       "mode": "simulated",
-      "engineVariables": ["credit"],
-      "notSimulated": ["bank balance sheets", "the quantity of money", "corporate bond spreads"],
+      "engineVariables": [
+        "credit"
+      ],
+      "notSimulated": [
+        "bank balance sheets",
+        "the quantity of money",
+        "corporate bond spreads"
+      ],
       "plain": "Income that is not spent becomes savings, and the financial system's job is to send those savings to people who want to invest. Bonds, loans and shares are not magic tickets. They are pipes. When the pipes clog, investment falls and future growth is weaker.",
       "analogy": "You skip takeaways for a year and put the money in the bank. The bank lends it to a builder putting up flats. Your leftover sandwiches helped create housing.",
       "watch": "Lending standards, loan growth, credit spreads.",
@@ -74,8 +108,14 @@
       "number": 7,
       "title": "Central banks and interest rates",
       "mode": "simulated",
-      "engineVariables": ["policyRate"],
-      "notSimulated": ["fiscal policy", "quantitative easing", "bank regulation"],
+      "engineVariables": [
+        "policyRate"
+      ],
+      "notSimulated": [
+        "fiscal policy",
+        "quantitative easing",
+        "bank regulation"
+      ],
       "plain": "The most important short-term transmission mechanism. The interest rate is the price of money over time. Raise it and new mortgages, car loans and business loans get dearer, so people borrow and spend less, which cools demand and eventually inflation.",
       "analogy": "A thermostat. Inflation running hot, turn the heating down. Economy frozen, turn it up. The thermostat does not cook dinner. It changes the room so that everything else happens differently.",
       "watch": "The policy rate and what the bank says it will do next.",
@@ -86,32 +126,52 @@
       "number": 8,
       "title": "The US dollar and government bonds",
       "mode": "simulated",
-      "engineVariables": ["treasuryYield", "dollar"],
-      "notSimulated": ["the yield curve", "corporate bonds", "other currencies individually"],
+      "engineVariables": [
+        "treasuryYield",
+        "dollar",
+        "piExp"
+      ],
+      "notSimulated": [
+        "the yield curve",
+        "corporate bonds",
+        "other currencies individually"
+      ],
       "plain": "Close to the centre of the global financial system. Much of world trade and debt is priced in dollars even when neither side is American, and government bonds set the benchmark that everything else is valued against.",
       "analogy": "Treasuries are the school's official measuring stick. If the stick itself gets dearer to use, every other project has to look more attractive to be worth doing. That is why a move in US yields can knock share prices in London and house prices in Sydney.",
       "watch": "The ten-year yield and the dollar index.",
       "discuss": "Say the inverse rule out loud until it is boring: yields up, bond prices down.",
-      "engineNote": "Both move in the same quarter as the shock. There is one long rate, not a curve."
+      "engineNote": "Both move in the same quarter as the shock. There is one long rate, not a curve. Expected inflation lives here too, because the yield equation is what prices it."
     },
     {
       "number": 9,
       "title": "Asset markets",
-      "mode": "partial",
-      "engineVariables": ["equity", "gExp", "piExp"],
-      "notSimulated": ["property", "gold", "corporate bonds", "commodities other than energy"],
+      "mode": "simulated",
+      "engineVariables": [
+        "equity",
+        "gExp"
+      ],
+      "notSimulated": [
+        "property",
+        "gold",
+        "corporate bonds",
+        "commodities other than energy"
+      ],
       "plain": "Once growth expectations, inflation, rates and the dollar are in motion, they show up in prices. A share price is expected future profits divided by the return investors demand, so two quite different things can move it: the profits, or the discount rate.",
       "analogy": "Good news for the economy is not always a good day for shares. If the good news makes people expect higher rates, valuations can fall even while profits rise.",
       "watch": "Valuations against profits, not the index level alone.",
       "discuss": "If the central bank surprises everyone with a big rise, what happens to equities, bonds, housing and gold, and why?",
-      "engineNote": "Equity is simulated and computed last in the quarter, so the shock quarter already contains the full financial hit. Property and gold are discussed only."
+      "engineNote": "Equity is simulated and computed last in the quarter, so the shock quarter already contains the full financial hit. Expected growth lives here, because it is what a share price is a claim on. Property and gold are discussed only."
     },
     {
       "number": 10,
       "title": "The feedback loop",
       "mode": "partial",
       "engineVariables": [],
-      "notSimulated": ["confidence", "credit crises", "anything the model calls a breakpoint"],
+      "notSimulated": [
+        "confidence",
+        "credit crises",
+        "anything the model calls a breakpoint"
+      ],
       "plain": "The hierarchy is not a one-way staircase. Asset prices change wealth, wealth changes spending, spending changes profits and jobs and inflation, and inflation changes what the central bank does next.",
       "analogy": "If house prices and share prices fall, households cut back even when their wages have not changed. Economists call it the wealth effect.",
       "watch": "Whether a market move is starting to show up in spending.",

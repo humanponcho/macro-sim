@@ -255,13 +255,13 @@ describe("the layer map renders", () => {
     }
   });
 
-  test("a spoken or partial layer shows its not-simulated sentence", async () => {
+  test("every layer that omits something shows its sentence", async () => {
     const { buildMap } = await import("../src/ui/map.js");
     const tiles = buildMap(mapContent, hike[0], null);
     const tree = render.renderMap(tiles, content.copy, () => {});
     const omissions = walk(tree).filter((n) => n.className === "layer__omission");
 
-    const expected = tiles.filter((t) => t.mode !== "simulated").length;
+    const expected = tiles.filter((t) => t.notSimulated.length > 0).length;
     assert.equal(omissions.length, expected);
     for (const node of omissions) assert.match(node.textContent, /Not simulated here:/);
   });
@@ -298,15 +298,17 @@ describe("the layer map renders", () => {
 describe("the card screen renders", () => {
   const experiments = load("experiments.json").experiments;
 
-  const viewFor = (card, quarter, predictions = {}) => ({
+  const viewFor = (card, quarter, predictions = {}, answerShown = false) => ({
     quarter,
     predictions,
     cues: card.watchFor.filter((c) => c.quarter <= quarter),
     finished: quarter >= card.quarters,
+    answerShown,
     onPredict: () => {},
     onAdvance: () => {},
     onBack: () => {},
     onReset: () => {},
+    onRevealAnswer: () => {},
   });
 
   test("the prediction checklist gates the first advance", () => {
@@ -372,6 +374,18 @@ describe("the card screen renders", () => {
     );
   });
 
+  test("the card's answer is held back until the room has been asked", () => {
+    const card = experiments[0];
+    const asked = render.renderCard(card, viewFor(card, card.quarters), content.copy, content.variables);
+    const shown = render.renderCard(
+      card, viewFor(card, card.quarters, {}, true), content.copy, content.variables,
+    );
+
+    assert.doesNotMatch(textOf(asked), /Credit contributed exactly zero/);
+    assert.match(textOf(asked), /Show the answer/);
+    assert.match(textOf(shown), /Credit contributed exactly zero/);
+  });
+
   test("every card renders at every quarter with nothing blank", () => {
     for (const card of experiments) {
       for (let q = 0; q <= card.quarters; q += 1) {
@@ -382,5 +396,102 @@ describe("the card screen renders", () => {
         assert.ok(!text.includes("NaN"), `${card.id} Q${q}`);
       }
     }
+  });
+});
+
+/* --- phase 5: drawer and exit ticket --- */
+
+describe("the glossary drawer renders", () => {
+  const glossaryContent = { ...content, glossary: load("glossary.json").glossary };
+
+  test("every term and meaning appears, nothing blank", async () => {
+    const { buildGlossary } = await import("../src/ui/study.js");
+    const model = buildGlossary(glossaryContent);
+    const tree = render.renderGlossary(model, content.copy, {
+      onClose(){}, onSearch(){}, onWatch(){},
+    });
+
+    const terms = walk(tree).filter((n) => n.className === "drawer__term");
+    assert.equal(terms.length, model.entries.length);
+    for (const node of terms) assert.ok(textOf(node).trim());
+    assert.ok(!textOf(tree).includes("undefined"));
+  });
+
+  test("a watchable term offers to show it on screen", async () => {
+    const { buildGlossary } = await import("../src/ui/study.js");
+    const model = buildGlossary(glossaryContent, { query: "yield" });
+    const watched = [];
+    const tree = render.renderGlossary(model, content.copy, {
+      onClose(){}, onSearch(){}, onWatch: (v) => watched.push(v),
+    });
+
+    for (const node of walk(tree)) {
+      if (node.className === "drawer__watch") node.listeners.click();
+    }
+    assert.ok(watched.includes("treasuryYield"));
+  });
+
+  test("an empty search says so instead of showing everything", async () => {
+    const { buildGlossary } = await import("../src/ui/study.js");
+    const tree = render.renderGlossary(
+      buildGlossary(glossaryContent, { query: "zzzzz" }), content.copy,
+      { onClose(){}, onSearch(){}, onWatch(){} },
+    );
+
+    assert.match(textOf(tree), /No term matches that/);
+    assert.equal(walk(tree).filter((n) => n.className === "drawer__term").length, 0);
+  });
+});
+
+describe("the exit ticket renders", () => {
+  const ticketContent = { ...content, layers: load("layers.json").layers };
+  const handlers = { onAnswer(){}, onReveal(){}, onReset(){} };
+
+  test("all five questions render with their options", async () => {
+    const { buildExitTicket } = await import("../src/ui/study.js");
+    const tree = render.renderExitTicket(buildExitTicket(ticketContent), content.copy, handlers);
+
+    assert.equal(walk(tree).filter((n) => n.className.startsWith("ticket__q")).length, 5);
+    assert.ok(!textOf(tree).includes("undefined"));
+  });
+
+  test("an unanswered markable question hides its answer", async () => {
+    const { buildExitTicket } = await import("../src/ui/study.js");
+    const tree = render.renderExitTicket(buildExitTicket(ticketContent), content.copy, handlers);
+
+    assert.doesNotMatch(textOf(tree), /The answer is Equity valuations/);
+  });
+
+  test("a wrong answer is marked and still shows the reason", async () => {
+    const { buildExitTicket } = await import("../src/ui/study.js");
+    const model = buildExitTicket(ticketContent, { answers: { moved_first: "credit" } });
+    const tree = render.renderExitTicket(model, content.copy, handlers);
+
+    assert.match(textOf(tree), /Not quite/);
+    assert.match(textOf(tree), /The answer is Equity valuations/);
+    assert.match(textOf(tree), /Credit reads the previous quarter/);
+    assert.ok(walk(tree).some((n) => n.className.includes("ticket__q--wrong")));
+  });
+
+  test("an open question reveals only on request", async () => {
+    const { buildExitTicket } = await import("../src/ui/study.js");
+    const hidden = render.renderExitTicket(buildExitTicket(ticketContent), content.copy, handlers);
+    const shown = render.renderExitTicket(
+      buildExitTicket(ticketContent, { revealed: { why_slow: true } }), content.copy, handlers,
+    );
+
+    assert.doesNotMatch(textOf(hidden), /credit, energy and wealth/);
+    assert.match(textOf(shown), /credit, energy and wealth/);
+  });
+
+  test("answering every markable question shows the closing line", async () => {
+    const { buildExitTicket } = await import("../src/ui/study.js");
+    const answers = { moved_first: "equity", bond_rule: "It falls", place_drought: 2, place_jobs: 5 };
+    const tree = render.renderExitTicket(
+      buildExitTicket(ticketContent, { answers }), content.copy, handlers,
+    );
+
+    assert.match(textOf(tree), /You do not need to forecast the economy/);
+    assert.match(textOf(tree), /Answered 4 of 5/);
   });
 });

@@ -9,6 +9,7 @@ import { runTape } from "../engine/engine.js";
 import { buildScreen } from "./viewmodel.js";
 import { stageEntry, withEntry, truncate, effectiveInputs, tapeLength } from "./tape.js";
 import { buildMap, buildLayerPanel } from "./map.js";
+import { buildGlossary, buildExitTicket } from "./study.js";
 import {
   el,
   renderBanner,
@@ -19,6 +20,8 @@ import {
   renderMap,
   renderLayerPanel,
   renderCard,
+  renderGlossary,
+  renderExitTicket,
 } from "./render.js";
 
 const MAX_QUARTERS = 24;
@@ -56,6 +59,11 @@ function createApp(content) {
     view: "simulate",
     selectedLayer: null,
     predictions: {},
+    drawerOpen: false,
+    glossaryQuery: "",
+    cardAnswerShown: false,
+    ticketAnswers: {},
+    ticketRevealed: {},
   };
 
   const root = document.querySelector("#app");
@@ -137,6 +145,7 @@ function createApp(content) {
     if (!card) return reset();
 
     state.predictions = {};
+    state.cardAnswerShown = false;
     state.playing = card;
     state.tape = card.tape.map((entry) => ({ ...entry }));
     state.policyMode = card.policyMode;
@@ -231,12 +240,11 @@ function createApp(content) {
       ["simulate", "Simulate"],
       ["map", copy.panels.map],
       ["cards", "Shock cards"],
+      ["check", copy.exitTicket.title],
     ];
 
-    return el(
-      "nav",
-      { class: "nav" },
-      views.map(([id, label]) =>
+    return el("nav", { class: "nav" }, [
+      ...views.map(([id, label]) =>
         el("button", {
           type: "button",
           class: "nav__tab" + (state.view === id ? " nav__tab--on" : ""),
@@ -248,7 +256,17 @@ function createApp(content) {
           },
         }),
       ),
-    );
+      el("button", {
+        type: "button",
+        class: "nav__drawer",
+        "aria-pressed": String(state.drawerOpen),
+        text: copy.glossaryDrawer.open,
+        onclick: () => {
+          state.drawerOpen = !state.drawerOpen;
+          draw();
+        },
+      }),
+    ]);
   }
 
   function draw() {
@@ -271,6 +289,11 @@ function createApp(content) {
           predictions: state.predictions,
           cues: state.playing.watchFor.filter((cue) => cue.quarter <= state.quarter),
           finished: state.quarter >= state.playing.quarters,
+          answerShown: state.cardAnswerShown,
+          onRevealAnswer: () => {
+            state.cardAnswerShown = true;
+            draw();
+          },
           onPredict: (variable, answer) => {
             state.predictions = { ...state.predictions, [variable]: answer };
             draw();
@@ -324,12 +347,42 @@ function createApp(content) {
       state.view === "map" ? renderMap(mapTiles, copy, selectLayer) : null,
       state.view === "map" ? renderLayerPanel(layerPanel, copy) : null,
 
-      screen.tiles ? renderTiles(screen.tiles, copy) : null,
+      state.view === "check"
+        ? renderExitTicket(
+            buildExitTicket(content, {
+              answers: state.ticketAnswers,
+              revealed: state.ticketRevealed,
+            }),
+            copy,
+            {
+              onAnswer: (id, value) => {
+                state.ticketAnswers = { ...state.ticketAnswers, [id]: value };
+                draw();
+              },
+              onReveal: (id) => {
+                state.ticketRevealed = {
+                  ...state.ticketRevealed,
+                  [id]: !state.ticketRevealed[id],
+                };
+                draw();
+              },
+              onReset: () => {
+                state.ticketAnswers = {};
+                state.ticketRevealed = {};
+                draw();
+              },
+            },
+          )
+        : null,
+
+      state.view !== "check" && screen.tiles ? renderTiles(screen.tiles, copy) : null,
       state.view === "simulate" && screen.expectations
         ? renderExpectations(screen.expectations, copy)
         : null,
-      state.view !== "cards" && screen.pipeline ? renderPipeline(screen.pipeline, copy) : null,
-      screen.attribution
+      state.view !== "cards" && state.view !== "check" && screen.pipeline
+        ? renderPipeline(screen.pipeline, copy)
+        : null,
+      state.view !== "check" && screen.attribution
         ? renderAttribution(
             screen.attribution,
             screen.explainable,
@@ -341,6 +394,32 @@ function createApp(content) {
             },
           )
         : null,
+      state.drawerOpen
+        ? renderGlossary(
+            buildGlossary(content, { query: state.glossaryQuery }),
+            copy,
+            {
+              onClose: () => {
+                state.drawerOpen = false;
+                draw();
+              },
+              onSearch: (query) => {
+                state.glossaryQuery = query;
+                draw();
+              },
+              onWatch: (variable) => {
+                // Send the reader to the thing itself, not another paragraph.
+                state.drawerOpen = false;
+                state.view = "simulate";
+                if (screen.attribution && screen.explainable.includes(variable)) {
+                  state.explaining = variable;
+                }
+                draw();
+              },
+            },
+          )
+        : null,
+
       el("footer", { class: "footnote" }, [
         el("p", { text: copy.footer.disclaimer }),
         el("p", { text: copy.footer.outOfScope }),

@@ -94,15 +94,32 @@ describe("spoken layers hold no engine controls", () => {
     assert.match(validateLayerRefs(broken, content)[0], /spoken but claims/);
   });
 
-  test("every layer that is not fully simulated says what it leaves out", () => {
+  test("every layer that leaves something out says so, simulated or not", () => {
     const map = buildMap(content, hike[0], null);
 
     for (const tile of map) {
-      if (tile.mode === "simulated") continue;
-      assert.ok(tile.notSimulated.length > 0, `L${tile.number} omits nothing`);
+      if (tile.notSimulated.length === 0) continue;
       assert.ok(tile.omission, `L${tile.number} has no sentence to show`);
       assert.match(tile.omission, /Not simulated here:/);
     }
+  });
+
+  test("a simulated layer still owes the class its omissions", () => {
+    // Layer 9 is simulated, and property and gold are still not in the model.
+    const assets = buildMap(content, hike[0], null).find((t) => t.number === 9);
+
+    assert.equal(assets.mode, "simulated");
+    assert.match(assets.omission, /property/i);
+    assert.match(assets.omission, /gold/i);
+  });
+
+  test("a partial layer names what it cannot show", () => {
+    const map = buildMap(content, hike[0], null);
+    const trade = map.find((t) => t.number === 4);
+    const labour = map.find((t) => t.number === 5);
+
+    assert.match(trade.omission, /tariffs/i);
+    assert.match(labour.omission, /employment|wages/i);
   });
 
   test("the omission sentence reads as a sentence, not a list dump", () => {
