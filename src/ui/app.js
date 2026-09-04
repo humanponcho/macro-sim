@@ -8,6 +8,7 @@
 import { runTape } from "../engine/engine.js";
 import { buildScreen } from "./viewmodel.js";
 import { stageEntry, withEntry, truncate, effectiveInputs, tapeLength } from "./tape.js";
+import { buildMap, buildLayerPanel } from "./map.js";
 import {
   el,
   renderBanner,
@@ -15,6 +16,9 @@ import {
   renderExpectations,
   renderPipeline,
   renderAttribution,
+  renderMap,
+  renderLayerPanel,
+  renderCard,
 } from "./render.js";
 
 const MAX_QUARTERS = 24;
@@ -49,6 +53,9 @@ function createApp(content) {
     // While a card is playing, the tape is authoritative and the controls
     // follow it. Touching a control takes the wheel back.
     playing: null,
+    view: "simulate",
+    selectedLayer: null,
+    predictions: {},
   };
 
   const root = document.querySelector("#app");
@@ -94,6 +101,30 @@ function createApp(content) {
     draw();
   }
 
+  /**
+   * Select a layer. This is a read: it opens the attribution panel for the
+   * layer's variables and changes no input. Cards move the rate. The map
+   * does not.
+   */
+  function selectLayer(number) {
+    state.selectedLayer = state.selectedLayer === number ? null : number;
+
+    const panel = state.selectedLayer
+      ? buildLayerPanel(content, state.selectedLayer, null)
+      : null;
+    const first = panel?.variableLabels.find((v) => content.variables[v.id])?.id;
+    if (first && state.quarter > 0) {
+      const snapshots = runTape(state.tape, {
+        quarters: state.quarter,
+        policyMode: state.policyMode,
+      });
+      const last = snapshots[snapshots.length - 1];
+      if (last?.contributions?.[first]) state.explaining = first;
+    }
+
+    draw();
+  }
+
   /** A control moved. Take the wheel back from whatever card was playing. */
   function takeTheWheel() {
     if (!state.playing) return;
@@ -105,6 +136,7 @@ function createApp(content) {
     const card = content.experiments.find((c) => c.id === id);
     if (!card) return reset();
 
+    state.predictions = {};
     state.playing = card;
     state.tape = card.tape.map((entry) => ({ ...entry }));
     state.policyMode = card.policyMode;
@@ -194,12 +226,60 @@ function createApp(content) {
     ]);
   }
 
+  function renderNav() {
+    const views = [
+      ["simulate", "Simulate"],
+      ["map", copy.panels.map],
+      ["cards", "Shock cards"],
+    ];
+
+    return el(
+      "nav",
+      { class: "nav" },
+      views.map(([id, label]) =>
+        el("button", {
+          type: "button",
+          class: "nav__tab" + (state.view === id ? " nav__tab--on" : ""),
+          "aria-pressed": String(state.view === id),
+          text: label,
+          onclick: () => {
+            state.view = id;
+            draw();
+          },
+        }),
+      ),
+    );
+  }
+
   function draw() {
     const snapshots = runTape(state.tape, {
       quarters: state.quarter,
       policyMode: state.policyMode,
     });
     const screen = buildScreen(snapshots, { explaining: state.explaining }, content);
+    const snapshot = snapshots[snapshots.length - 1] ?? null;
+    const previous = snapshots[snapshots.length - 2] ?? null;
+
+    const mapTiles = buildMap(content, snapshot, previous, state.selectedLayer);
+    const layerPanel = state.selectedLayer
+      ? buildLayerPanel(content, state.selectedLayer, snapshot)
+      : null;
+
+    const cardView = state.playing
+      ? {
+          quarter: state.quarter,
+          predictions: state.predictions,
+          cues: state.playing.watchFor.filter((cue) => cue.quarter <= state.quarter),
+          finished: state.quarter >= state.playing.quarters,
+          onPredict: (variable, answer) => {
+            state.predictions = { ...state.predictions, [variable]: answer };
+            draw();
+          },
+          onAdvance: advance,
+          onBack: back,
+          onReset: reset,
+        }
+      : null;
 
     root.replaceChildren(
       el("header", { class: "masthead" }, [
@@ -210,7 +290,8 @@ function createApp(content) {
           el("span", { class: "masthead__number", text: String(screen.quarter) }),
         ]),
       ]),
-      renderControls(),
+      renderNav(),
+      state.view === "simulate" ? renderControls() : null,
       state.playing
         ? el("p", { class: "banner banner--card" }, [
             el("strong", { text: `${state.playing.title}. ` }),
@@ -218,9 +299,36 @@ function createApp(content) {
           ])
         : null,
       renderBanner(screen.banner),
+
+      state.view === "cards"
+        ? el("div", { class: "cardpicker" }, [
+            el(
+              "div",
+              { class: "cardpicker__row" },
+              content.experiments.map((card) =>
+                el("button", {
+                  type: "button",
+                  class:
+                    "button" + (state.playing?.id === card.id ? " button--primary" : ""),
+                  text: card.title,
+                  onclick: () => loadCard(card.id),
+                }),
+              ),
+            ),
+            state.playing
+              ? renderCard(state.playing, cardView, copy, content.variables)
+              : el("p", { class: "panel__note", text: "Pick a card to begin." }),
+          ])
+        : null,
+
+      state.view === "map" ? renderMap(mapTiles, copy, selectLayer) : null,
+      state.view === "map" ? renderLayerPanel(layerPanel, copy) : null,
+
       screen.tiles ? renderTiles(screen.tiles, copy) : null,
-      screen.expectations ? renderExpectations(screen.expectations, copy) : null,
-      screen.pipeline ? renderPipeline(screen.pipeline, copy) : null,
+      state.view === "simulate" && screen.expectations
+        ? renderExpectations(screen.expectations, copy)
+        : null,
+      state.view !== "cards" && screen.pipeline ? renderPipeline(screen.pipeline, copy) : null,
       screen.attribution
         ? renderAttribution(
             screen.attribution,

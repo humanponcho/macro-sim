@@ -27,7 +27,7 @@ lesson content can safely be written against it.
 | 1 | Engine port, golden tests, acceptance tests T0–T10, `NaN` guard | **Done** |
 | 2 | Target values, per-link contributions, replay-based step back | **Done** |
 | 3 | The Simulate screen | **Done** |
-| 4 | The layer map and shock cards | Not started |
+| 4 | The layer map and shock cards | **Done** |
 | 5 | Activities, assessment, teacher mode | Not started |
 
 ## Running the app
@@ -72,6 +72,8 @@ That runs four suites:
   `undefined`, `NaN` or signed zero reaches any panel of any card.
 - **Tape.** Editing the run, including that playing a shock card never
   rewrites it.
+- **Map.** Every engine id a layer claims resolves, spoken layers hold no
+  controls, and selecting a layer changes no input.
 
 To regenerate the golden files after a deliberate change to the reference
 calculator:
@@ -92,6 +94,7 @@ src/display/
 
 src/ui/
   viewmodel.js      Snapshot plus content, turned into rows. Pure, so it is tested.
+  map.js            The layer map. Pure, and reads its mapping from layers.json.
   render.js         The DOM layer. Walks those rows, makes no decisions.
   tape.js           Editing the run. Pure, so it is tested.
   app.js            State and events.
@@ -108,6 +111,7 @@ test/
   ui.viewmodel.test.js         What the screen decides.
   ui.render.test.js            The DOM layer, against a document stub.
   ui.tape.test.js              Editing the run.
+  ui.map.test.js               The layer map and the cards.
   model.coefficients.test.js   Guards against coefficient drift.
   golden/scenarios.json        Scenario tapes, shared by both languages.
   golden/*.csv                 Generated. Do not edit by hand.
@@ -322,6 +326,54 @@ move the controls, and each advance records what changed. **Playing**: a shock
 card supplies the whole tape, and advancing reveals the next quarter. Touching a
 control takes the wheel back, keeping the quarters already seen and dropping the
 rest of the card.
+
+## The map
+
+The map is a legend for the engine, not a second engine. **Selecting a layer is
+a read.** It opens the attribution panel for that layer's variables and changes
+no input. Cards move the rate; the map does not.
+
+Which variable belongs to which layer is a content decision. `map.js` reads the
+mapping out of `layers.json` and validates it, so changing the map means editing
+one JSON file and never the module. A layer may claim three kinds of engine id:
+a readout variable, a link (for a layer whose story is a channel rather than a
+level, such as the wealth effect), or `energySupplyGap`, which is set rather
+than computed.
+
+Each tile carries one of three states, and only one:
+
+| State | Meaning |
+| --- | --- |
+| quiet | Nothing here changed and nothing is on its way. |
+| moved this quarter | Something here changed, at display precision. |
+| in flight | Nothing changed, but a delayed variable is still travelling. |
+
+The order matters for teaching. In the quarter of a rate rise, layer 6 shows
+**in flight** precisely because it did not move. The lag is the lesson.
+
+A layer that is not fully simulated shows what it leaves out, on the tile
+itself: *"The lesson covers this layer, but the model does not compute it. Talk
+about it instead. Not simulated here: tariffs, trade volumes and shipping
+costs."* A student who asks about housing, jobs or gold gets that sentence, not
+a slider that pretends.
+
+Layer 7 is readable but not explainable. The policy rate is an input, so there
+is no equation behind it to break apart, and the tile is not a button.
+
+## The cards
+
+The four tapes in `experiments.json` are the only cards. There is no second tape
+format: a card is a starting state and an ordered list of quarterly inputs, the
+same shape `runTape` already takes.
+
+Each card runs in five steps: the title and setup, a **prediction checklist**
+that must be answered before the first advance, the teacher's opening line, the
+run itself in playing mode, and the watch-for cues as each quarter is reached.
+Predictions are marked immediately and the reason is revealed either way, so a
+wrong answer teaches rather than hides.
+
+If a card needs a line at a quarter it does not have, the key goes in
+`experiments.json`, never in the renderer.
 
 ## Source documents
 

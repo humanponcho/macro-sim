@@ -158,3 +158,174 @@ export function renderAttribution(panel, explainable, copy, variables, onSelect)
       : null,
   ]);
 }
+
+/* --- phase 4: the layer map and the cards --- */
+
+export function renderMap(tiles, copy, onSelect) {
+  return el("section", { class: "panel" }, [
+    el("h2", { class: "panel__title", text: copy.panels.map }),
+    el(
+      "ol",
+      { class: "map" },
+      // Read from the bottom up: layer 1 is the foundation.
+      [...tiles].reverse().map((tile) =>
+        el(
+          "li",
+          {
+            class:
+              `layer layer--${tile.mode} layer--${tile.activity}` +
+              (tile.selected ? " layer--selected" : ""),
+          },
+          [
+            el(
+              tile.selectable ? "button" : "div",
+              {
+                class: "layer__button",
+                type: tile.selectable ? "button" : undefined,
+                "aria-pressed": tile.selectable ? String(tile.selected) : undefined,
+                onclick: tile.selectable ? () => onSelect(tile.number) : undefined,
+              },
+              [
+                el("span", { class: "layer__number", text: String(tile.number) }),
+                el("span", { class: "layer__body" }, [
+                  el("span", { class: "layer__title", text: tile.title }),
+                  el("span", { class: "layer__meta" }, [
+                    el("span", { class: "layer__badge", text: tile.badge }),
+                    el("span", {
+                      class: "layer__activity",
+                      text:
+                        tile.activity === "moving"
+                          ? "moved this quarter"
+                          : tile.activity === "inFlight"
+                            ? "in flight"
+                            : "quiet",
+                    }),
+                  ]),
+                  tile.omission ? el("span", { class: "layer__omission", text: tile.omission }) : null,
+                ]),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  ]);
+}
+
+export function renderLayerPanel(panel, copy) {
+  if (!panel) return null;
+
+  return el("section", { class: "panel panel--layer" }, [
+    el("h2", { class: "panel__title", text: `${panel.number}. ${panel.title}` }),
+    el("p", { class: "panel__lead", text: panel.plain }),
+    panel.analogy ? el("p", { class: "panel__note", text: panel.analogy }) : null,
+    panel.engineNote ? el("p", { class: "panel__engine", text: panel.engineNote }) : null,
+    panel.omission ? el("p", { class: "panel__omission", text: panel.omission }) : null,
+    panel.watch ? el("p", { class: "panel__note" }, [
+      el("strong", { text: "Watch: " }),
+      document.createTextNode(panel.watch),
+    ]) : null,
+    panel.discuss ? el("p", { class: "panel__note" }, [
+      el("strong", { text: "Discuss: " }),
+      document.createTextNode(panel.discuss),
+    ]) : null,
+    panel.variableLabels.length
+      ? el("ul", { class: "layer__vars" },
+          panel.variableLabels.map((v) =>
+            el("li", { class: v.explainable ? "layer__var" : "layer__var layer__var--input" }, [
+              el("span", { text: v.label }),
+              v.explainable ? null : el("span", { class: "layer__varflag", text: "you set this" }),
+            ]),
+          ))
+      : null,
+  ]);
+}
+
+export function renderCard(card, view, copy, variables) {
+  const answered = Object.keys(view.predictions ?? {}).length;
+  const ready = answered >= card.predict.length;
+
+  return el("section", { class: "panel panel--card" }, [
+    el("h2", { class: "panel__title", text: card.title }),
+    el("p", { class: "card__subtitle", text: card.subtitle }),
+    el("p", { class: "panel__lead", text: card.setup }),
+
+    el("div", { class: "predict" }, [
+      el("h3", { class: "predict__prompt", text: card.predictPrompt }),
+      el(
+        "ol",
+        { class: "predict__list" },
+        card.predict.map((item) => {
+          const chosen = view.predictions?.[item.variable];
+          const correct = chosen === item.answer;
+
+          return el("li", { class: "predict__row" }, [
+            el("span", { class: "predict__label", text: variables[item.variable].label }),
+            el("span", { class: "predict__choices" }, [
+              ...["moves", "still"].map((option) =>
+                el("button", {
+                  type: "button",
+                  class:
+                    "predict__choice" +
+                    (chosen === option ? " predict__choice--chosen" : ""),
+                  text: option === "moves" ? "Will move" : "Will not move",
+                  onclick: () => view.onPredict(item.variable, option),
+                }),
+              ),
+            ]),
+            chosen
+              ? el("span", {
+                  class: `predict__mark predict__mark--${correct ? "right" : "wrong"}`,
+                  text: correct ? "yes" : "no",
+                })
+              : null,
+            chosen ? el("span", { class: "predict__because", text: item.because }) : null,
+          ]);
+        }),
+      ),
+      ready
+        ? null
+        : el("p", { class: "predict__gate", text: "Answer every line before you advance." }),
+    ]),
+
+    el("p", { class: "card__teacher" }, [
+      el("strong", { text: "Before you start: " }),
+      document.createTextNode(card.teacherLine),
+    ]),
+
+    el("div", { class: "actions" }, [
+      el("button", {
+        class: "button button--primary",
+        text: view.quarter === 0 ? "Start the card" : copy.actions.advance,
+        disabled: !ready,
+        onclick: view.onAdvance,
+      }),
+      el("button", { class: "button", text: copy.actions.back, disabled: view.quarter === 0, onclick: view.onBack }),
+      el("button", { class: "button", text: copy.actions.reset, onclick: view.onReset }),
+    ]),
+
+    view.cues.length
+      ? el("div", { class: "cues" }, [
+          el("h3", { class: "cues__title", text: "What the class should see" }),
+          el(
+            "ol",
+            { class: "cues__list" },
+            view.cues.map((cue) =>
+              el("li", { class: "cue" }, [
+                el("span", { class: "cue__quarter", text: `Q${cue.quarter}` }),
+                el("span", { class: "cue__say", text: cue.say }),
+              ]),
+            ),
+          ),
+        ])
+      : null,
+
+    view.finished && card.askTheClass
+      ? el("div", { class: "cues" }, [
+          el("h3", { class: "cues__title", text: "Ask the class" }),
+          el("p", { class: "panel__lead", text: card.askTheClass }),
+          el("p", { class: "panel__note", text: card.answer }),
+        ])
+      : null,
+  ]);
+}

@@ -7,29 +7,100 @@
       "subtitle": "Policy rate up one point in Q1, held for two years",
       "quarters": 8,
       "policyMode": "manual",
-      "tape": [{ "quarter": 1, "policyRate": 4.5 }],
+      "tape": [
+        {
+          "quarter": 1,
+          "policyRate": 4.5
+        }
+      ],
       "teacherLine": "Markets have moved. The real economy has not responded yet.",
       "setup": "You are the central bank. Inflation is at target and growth is steady, and you raise the rate anyway. Watch which parts of the screen move in the first quarter and which do not.",
+      "predictPrompt": "Before you advance: by the end of the first quarter, which of these will have moved?",
+      "predict": [
+        {
+          "variable": "treasuryYield",
+          "answer": "moves",
+          "because": "The long rate follows the short rate in the same quarter."
+        },
+        {
+          "variable": "equity",
+          "answer": "moves",
+          "because": "Valuations reprice immediately, on the yield and on weaker expected growth."
+        },
+        {
+          "variable": "credit",
+          "answer": "still",
+          "because": "Credit reads the previous quarter. It cannot move in the quarter of the decision."
+        },
+        {
+          "variable": "growth",
+          "answer": "still",
+          "because": "Rates reach growth only through credit, energy and wealth, and none of those have moved yet."
+        }
+      ],
       "watchFor": [
-        { "quarter": 1, "say": "Yield up, dollar up, equities down about five and a half points. Growth and inflation both still read 2.00. Nothing in the real economy has happened." },
-        { "quarter": 1, "say": "Look at the credit tile. Current 100. Target 95.6. Nothing has happened yet, and something certainly will. That gap is the lag." },
-        { "quarter": 2, "say": "Credit starts to tighten. Growth and inflation have barely moved." },
-        { "quarter": 6, "say": "Growth has slid towards 1.6 and inflation follows more slowly, into the high 1.7s. It took a year and a half." }
+        {
+          "quarter": 1,
+          "say": "Yield up, dollar up, equities down about five and a half points. Growth and inflation both still read 2.00. Nothing in the real economy has happened."
+        },
+        {
+          "quarter": 1,
+          "say": "Look at the credit tile. Current 100. Target 95.6. Nothing has happened yet, and something certainly will. That gap is the lag."
+        },
+        {
+          "quarter": 2,
+          "say": "Credit starts to tighten. Growth and inflation have barely moved."
+        },
+        {
+          "quarter": 6,
+          "say": "Growth has slid towards 1.6 and inflation follows more slowly, into the high 1.7s. It took a year and a half."
+        }
       ],
       "askTheClass": "Equity fell in Q1. Open the attribution panel. Which term did the most damage, and which contributed exactly nothing?",
       "answer": "The discount rate did most of it, at minus 3.37. Credit contributed exactly zero, because credit has a one-quarter lag and had not moved yet.",
       "expect": [
         {
           "quarter": 1,
-          "values": { "policyRate": 4.5, "equity": 94.393, "credit": 100.0, "growth": 2.0, "inflation": 2.0 },
-          "target": { "credit": 95.572, "growth": 1.942, "inflation": 1.797 },
+          "values": {
+            "policyRate": 4.5,
+            "equity": 94.393,
+            "credit": 100.0,
+            "growth": 2.0,
+            "inflation": 2.0
+          },
+          "target": {
+            "credit": 95.572,
+            "growth": 1.942,
+            "inflation": 1.797
+          },
           "contributions": {
-            "equity": { "y_to_eq": -3.372, "gexp_to_eq": -2.4, "cred_to_eq": 0, "e_to_eq": 0.165 },
-            "credit": { "r_to_cred": 0, "g_to_cred": 0, "usd_to_cred": 0 }
+            "equity": {
+              "y_to_eq": -3.372,
+              "gexp_to_eq": -2.4,
+              "cred_to_eq": 0,
+              "e_to_eq": 0.165
+            },
+            "credit": {
+              "r_to_cred": 0,
+              "g_to_cred": 0,
+              "usd_to_cred": 0
+            }
           }
         },
-        { "quarter": 2, "values": { "credit": 97.786 } },
-        { "quarter": 6, "values": { "growth": 1.598, "inflation": 1.798, "credit": 94.945 } }
+        {
+          "quarter": 2,
+          "values": {
+            "credit": 97.786
+          }
+        },
+        {
+          "quarter": 6,
+          "values": {
+            "growth": 1.598,
+            "inflation": 1.798,
+            "credit": 94.945
+          }
+        }
       ]
     },
     {
@@ -38,27 +109,89 @@
       "subtitle": "Energy up ten points in Q1, held, and the bank does nothing",
       "quarters": 8,
       "policyMode": "manual",
-      "tape": [{ "quarter": 1, "energySupplyGap": 10.0 }],
+      "tape": [
+        {
+          "quarter": 1,
+          "energySupplyGap": 10.0
+        }
+      ],
       "teacherLine": "A physical shock, two layers down, arriving as inflation a quarter later.",
       "setup": "A disruption takes energy supply out of the system and it does not come back. The policy rate stays where it is. This is the shock that starts in the physical economy rather than the financial one.",
+      "predictPrompt": "Before you advance: this shock starts in the physical economy. Which of these moves first?",
+      "predict": [
+        {
+          "variable": "energy",
+          "answer": "moves",
+          "because": "The supply shock is exogenous and lands the same quarter."
+        },
+        {
+          "variable": "equity",
+          "answer": "moves",
+          "because": "Higher costs and weaker expected growth both hit valuations at once."
+        },
+        {
+          "variable": "inflation",
+          "answer": "still",
+          "because": "Energy reaches the shelf from the next quarter, not this one."
+        },
+        {
+          "variable": "policyRate",
+          "answer": "still",
+          "because": "Nobody has touched it. On this card the bank does nothing."
+        }
+      ],
       "watchFor": [
-        { "quarter": 1, "say": "Energy jumps almost ten points. Equities fall. Yields tick up because expected inflation rose. Printed inflation is still exactly 2.00." },
-        { "quarter": 2, "say": "Inflation prints 2.24. Growth starts to feel the cost." },
-        { "quarter": 5, "say": "Inflation near 2.8 with growth near 1.55. That is stagflation in miniature: prices up and output down at the same time." }
+        {
+          "quarter": 1,
+          "say": "Energy jumps almost ten points. Equities fall. Yields tick up because expected inflation rose. Printed inflation is still exactly 2.00."
+        },
+        {
+          "quarter": 2,
+          "say": "Inflation prints 2.24. Growth starts to feel the cost."
+        },
+        {
+          "quarter": 5,
+          "say": "Inflation near 2.8 with growth near 1.55. That is stagflation in miniature: prices up and output down at the same time."
+        }
       ],
       "askTheClass": "Compare the equity attribution with the rate-rise card. Same fall, different reason. What changed?",
       "answer": "In the rate rise, the discount rate did the damage. Here the discount rate barely moved; energy costs and weaker expected growth did it instead. Same direction, different cause, so a different policy would be needed.",
       "expect": [
         {
           "quarter": 1,
-          "values": { "policyRate": 3.5, "energy": 109.755, "equity": 95.284, "inflation": 2.0, "credit": 100.0 },
-          "target": { "inflation": 2.933 },
+          "values": {
+            "policyRate": 3.5,
+            "energy": 109.755,
+            "equity": 95.284,
+            "inflation": 2.0,
+            "credit": 100.0
+          },
+          "target": {
+            "inflation": 2.933
+          },
           "contributions": {
-            "equity": { "y_to_eq": -0.57, "gexp_to_eq": -2.0, "cred_to_eq": 0, "e_to_eq": -2.146 }
+            "equity": {
+              "y_to_eq": -0.57,
+              "gexp_to_eq": -2.0,
+              "cred_to_eq": 0,
+              "e_to_eq": -2.146
+            }
           }
         },
-        { "quarter": 2, "values": { "inflation": 2.244, "growth": 1.863 } },
-        { "quarter": 6, "values": { "inflation": 2.791, "growth": 1.548 } }
+        {
+          "quarter": 2,
+          "values": {
+            "inflation": 2.244,
+            "growth": 1.863
+          }
+        },
+        {
+          "quarter": 6,
+          "values": {
+            "inflation": 2.791,
+            "growth": 1.548
+          }
+        }
       ]
     },
     {
@@ -68,22 +201,79 @@
       "quarters": 8,
       "policyMode": "manual",
       "tape": [
-        { "quarter": 1, "policyRate": 4.5 },
-        { "quarter": 3, "policyRate": 3.5 }
+        {
+          "quarter": 1,
+          "policyRate": 4.5
+        },
+        {
+          "quarter": 3,
+          "policyRate": 3.5
+        }
       ],
       "teacherLine": "The lag runs both ways. Undoing a decision takes as long as making it.",
       "setup": "Run the rate rise, then reverse it after two quarters. The point is not that the reversal works. The point is how long it takes to show up.",
+      "predictPrompt": "You will reverse the rise in quarter 3. Before you start: what will have recovered by quarter 6?",
+      "predict": [
+        {
+          "variable": "policyRate",
+          "answer": "moves",
+          "because": "You set it back yourself, so it returns the moment you do."
+        },
+        {
+          "variable": "equity",
+          "answer": "moves",
+          "because": "Markets reprice on the day, so equity recovers quickly."
+        },
+        {
+          "variable": "credit",
+          "answer": "moves",
+          "because": "It recovers, but slowly, and it is still below where it started."
+        },
+        {
+          "variable": "growth",
+          "answer": "moves",
+          "because": "It climbs back, later still, and has not finished by quarter 6."
+        }
+      ],
       "watchFor": [
-        { "quarter": 2, "say": "Identical to the held card so far. The reversal has not happened yet." },
-        { "quarter": 3, "say": "The rate is back to 3.50 today, but credit is still tightening from a decision taken two quarters ago." },
-        { "quarter": 6, "say": "Credit is recovering, near 99.5 against 94.9 if you had held. Growth is climbing back. The damage was real and it is being undone at the same speed it arrived." }
+        {
+          "quarter": 2,
+          "say": "Identical to the held card so far. The reversal has not happened yet."
+        },
+        {
+          "quarter": 3,
+          "say": "The rate is back to 3.50 today, but credit is still tightening from a decision taken two quarters ago."
+        },
+        {
+          "quarter": 6,
+          "say": "Credit is recovering, near 99.5 against 94.9 if you had held. Growth is climbing back. The damage was real and it is being undone at the same speed it arrived."
+        }
       ],
       "askTheClass": "In the quarter you reversed, did anything in the real economy improve?",
       "answer": "No. Markets repriced immediately, but credit, growth and inflation carried on moving in the old direction, because they read decisions from previous quarters.",
       "expect": [
-        { "quarter": 1, "values": { "equity": 94.393, "credit": 100.0 } },
-        { "quarter": 2, "values": { "credit": 97.786 } },
-        { "quarter": 6, "values": { "policyRate": 3.5, "credit": 99.497, "growth": 1.819, "equity": 99.411 } }
+        {
+          "quarter": 1,
+          "values": {
+            "equity": 94.393,
+            "credit": 100.0
+          }
+        },
+        {
+          "quarter": 2,
+          "values": {
+            "credit": 97.786
+          }
+        },
+        {
+          "quarter": 6,
+          "values": {
+            "policyRate": 3.5,
+            "credit": 99.497,
+            "growth": 1.819,
+            "equity": 99.411
+          }
+        }
       ]
     },
     {
@@ -92,27 +282,90 @@
       "subtitle": "Energy up ten points, and the central bank reacts automatically",
       "quarters": 8,
       "policyMode": "taylor",
-      "tape": [{ "quarter": 1, "energySupplyGap": 10.0 }],
+      "tape": [
+        {
+          "quarter": 1,
+          "energySupplyGap": 10.0
+        }
+      ],
       "teacherLine": "Now you are not the central bank. The rule is, and it responds to its own effects.",
       "setup": "Run the energy shock again, but hand the rate to the rule. Compare it with the card where the bank did nothing.",
+      "predictPrompt": "Same shock, but the bank is on a rule. Before you advance: is the class better or worse off than when the bank sat still?",
+      "predict": [
+        {
+          "variable": "policyRate",
+          "answer": "moves",
+          "because": "The rule reacts to expected inflation, before any inflation has printed."
+        },
+        {
+          "variable": "equity",
+          "answer": "moves",
+          "because": "It takes a deeper mark than the do-nothing run: the response is paid for too."
+        },
+        {
+          "variable": "inflation",
+          "answer": "still",
+          "because": "Still exactly 2.00. The rule is reacting to what it expects, not to what happened."
+        },
+        {
+          "variable": "growth",
+          "answer": "still",
+          "because": "Unmoved in the shock quarter, and weaker later than the do-nothing run."
+        }
+      ],
       "watchFor": [
-        { "quarter": 1, "say": "The rule raises the rate towards 3.9 straight away, on expected inflation, before any inflation has printed." },
-        { "quarter": 1, "say": "Equities take a deeper mark than when the bank sat still: about 92.9 against 95.3. The class is paying for the response as well as the shock." },
-        { "quarter": 2, "say": "The rate dips. Ask why before explaining." },
-        { "quarter": 6, "say": "Growth is weaker than in the do-nothing run, and inflation is only a little lower. Rates cannot make energy less scarce." }
+        {
+          "quarter": 1,
+          "say": "The rule raises the rate towards 3.9 straight away, on expected inflation, before any inflation has printed."
+        },
+        {
+          "quarter": 1,
+          "say": "Equities take a deeper mark than when the bank sat still: about 92.9 against 95.3. The class is paying for the response as well as the shock."
+        },
+        {
+          "quarter": 2,
+          "say": "The rate dips. Ask why before explaining."
+        },
+        {
+          "quarter": 6,
+          "say": "Growth is weaker than in the do-nothing run, and inflation is only a little lower. Rates cannot make energy less scarce."
+        }
       ],
       "askTheClass": "In Q2 the bank cuts, in the quarter that inflation first printed higher. Is that a mistake?",
       "answer": "No, it is arithmetic. The rule reads expectations, and expectations already contain the rate it set last quarter, so its own first move argues part of itself away. It is a real feature of rules that react to their own effects, and worth naming out loud rather than hiding.",
       "expect": [
         {
           "quarter": 1,
-          "values": { "policyRate": 3.919, "equity": 92.936, "inflation": 2.0, "credit": 100.0 },
+          "values": {
+            "policyRate": 3.919,
+            "equity": 92.936,
+            "inflation": 2.0,
+            "credit": 100.0
+          },
           "contributions": {
-            "equity": { "y_to_eq": -1.982, "gexp_to_eq": -3.005, "cred_to_eq": 0, "e_to_eq": -2.077 }
+            "equity": {
+              "y_to_eq": -1.982,
+              "gexp_to_eq": -3.005,
+              "cred_to_eq": 0,
+              "e_to_eq": -2.077
+            }
           }
         },
-        { "quarter": 2, "values": { "policyRate": 3.733, "inflation": 2.236 } },
-        { "quarter": 6, "values": { "policyRate": 3.934, "growth": 1.4, "inflation": 2.713 } }
+        {
+          "quarter": 2,
+          "values": {
+            "policyRate": 3.733,
+            "inflation": 2.236
+          }
+        },
+        {
+          "quarter": 6,
+          "values": {
+            "policyRate": 3.934,
+            "growth": 1.4,
+            "inflation": 2.713
+          }
+        }
       ]
     }
   ]

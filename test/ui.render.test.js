@@ -21,6 +21,7 @@ const load = (name) =>
 const content = {
   variables: load("variables.json").variables,
   links: load("links.json").links,
+  layers: load("layers.json").layers,
   experiments: load("experiments.json").experiments,
   copy: load("copy.json"),
 };
@@ -215,5 +216,171 @@ describe("nothing broken reaches the screen", () => {
     assert.match(textOf(render.renderBanner(screenFor(hike, 1).banner)), /real economy has not responded/);
     const later = render.renderBanner(screenFor(hike, 2).banner);
     if (later) assert.doesNotMatch(textOf(later), /real economy has not responded/);
+  });
+});
+
+/* --- phase 4: map and cards --- */
+
+describe("the layer map renders", () => {
+  const layers = load("layers.json").layers;
+  const mapContent = { ...content, layers };
+
+  test("all ten tiles render, bottom layer last in the list", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const tree = render.renderMap(buildMap(mapContent, hike[0], null), content.copy, () => {});
+    const numbers = walk(tree)
+      .filter((n) => n.className === "layer__number")
+      .map((n) => Number(n.textContent));
+
+    assert.equal(numbers.length, 10);
+    // Read bottom up: layer 1 sits at the foot of the stack, so it renders last.
+    assert.deepEqual(numbers, [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+  });
+
+  test("no tile has a blank title, badge or activity", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+
+    for (let q = 0; q <= 8; q += 1) {
+      const tiles = buildMap(mapContent, q ? hike[q - 1] : null, q > 1 ? hike[q - 2] : null);
+      const tree = render.renderMap(tiles, content.copy, () => {});
+
+      for (const cls of ["layer__title", "layer__badge", "layer__activity"]) {
+        const nodes = walk(tree).filter((n) => n.className === cls);
+        assert.equal(nodes.length, 10, `Q${q}: expected ten ${cls}`);
+        for (const node of nodes) {
+          assert.ok(node.textContent.trim(), `Q${q}: a blank ${cls}`);
+          assert.ok(!node.textContent.includes("undefined"), `Q${q}: undefined in ${cls}`);
+        }
+      }
+    }
+  });
+
+  test("a spoken or partial layer shows its not-simulated sentence", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const tiles = buildMap(mapContent, hike[0], null);
+    const tree = render.renderMap(tiles, content.copy, () => {});
+    const omissions = walk(tree).filter((n) => n.className === "layer__omission");
+
+    const expected = tiles.filter((t) => t.mode !== "simulated").length;
+    assert.equal(omissions.length, expected);
+    for (const node of omissions) assert.match(node.textContent, /Not simulated here:/);
+  });
+
+  test("only selectable layers render a button", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const tiles = buildMap(mapContent, hike[0], null);
+    const tree = render.renderMap(tiles, content.copy, () => {});
+    const buttons = walk(tree).filter((n) => n.tag === "button");
+
+    assert.equal(buttons.length, tiles.filter((t) => t.selectable).length);
+    assert.ok(buttons.length > 0);
+  });
+
+  test("clicking a layer calls back with its number and nothing else", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const clicks = [];
+    const tiles = buildMap(mapContent, hike[2], hike[1]);
+    const tree = render.renderMap(tiles, content.copy, (n) => clicks.push(n));
+
+    for (const node of walk(tree)) {
+      if (node.tag === "button" && node.listeners.click) node.listeners.click();
+    }
+
+    // The map renders bottom-up, so clicks arrive in reverse layer order.
+    assert.deepEqual(
+      clicks,
+      [...tiles].reverse().filter((t) => t.selectable).map((t) => t.number),
+    );
+    assert.ok(!clicks.includes(7), "layer 7 is a read, not a control");
+  });
+});
+
+describe("the card screen renders", () => {
+  const experiments = load("experiments.json").experiments;
+
+  const viewFor = (card, quarter, predictions = {}) => ({
+    quarter,
+    predictions,
+    cues: card.watchFor.filter((c) => c.quarter <= quarter),
+    finished: quarter >= card.quarters,
+    onPredict: () => {},
+    onAdvance: () => {},
+    onBack: () => {},
+    onReset: () => {},
+  });
+
+  test("the prediction checklist gates the first advance", () => {
+    const card = experiments[0];
+    const tree = render.renderCard(card, viewFor(card, 0), content.copy, content.variables);
+    const advance = walk(tree).find((n) => n.className.includes("button--primary"));
+
+    assert.equal(advance.attributes.disabled, "");
+    assert.match(textOf(tree), /Answer every line before you advance/);
+  });
+
+  test("answering every line opens the gate", () => {
+    const card = experiments[0];
+    const answers = Object.fromEntries(card.predict.map((p) => [p.variable, p.answer]));
+    const tree = render.renderCard(card, viewFor(card, 0, answers), content.copy, content.variables);
+    const advance = walk(tree).find((n) => n.className.includes("button--primary"));
+
+    assert.equal(advance.attributes.disabled, undefined);
+  });
+
+  test("an answer is marked, and its reason is revealed", () => {
+    const card = experiments[0];
+    const tree = render.renderCard(
+      card, viewFor(card, 0, { credit: "still" }), content.copy, content.variables,
+    );
+
+    assert.ok(walk(tree).some((n) => n.className === "predict__mark predict__mark--right"));
+    assert.match(textOf(tree), /Credit reads the previous quarter/);
+  });
+
+  test("a wrong answer is marked wrong, not hidden", () => {
+    const card = experiments[0];
+    const tree = render.renderCard(
+      card, viewFor(card, 0, { credit: "moves" }), content.copy, content.variables,
+    );
+
+    assert.ok(walk(tree).some((n) => n.className === "predict__mark predict__mark--wrong"));
+  });
+
+  test("cues appear only once their quarter is reached", () => {
+    const card = experiments.find((c) => c.id === "hike_held");
+
+    assert.doesNotMatch(
+      textOf(render.renderCard(card, viewFor(card, 0), content.copy, content.variables)),
+      /credit starts to tighten/i,
+    );
+    assert.match(
+      textOf(render.renderCard(card, viewFor(card, 2), content.copy, content.variables)),
+      /credit starts to tighten/i,
+    );
+  });
+
+  test("the closing question appears only at the end of the run", () => {
+    const card = experiments[0];
+
+    assert.doesNotMatch(
+      textOf(render.renderCard(card, viewFor(card, 3), content.copy, content.variables)),
+      /Open the attribution panel/,
+    );
+    assert.match(
+      textOf(render.renderCard(card, viewFor(card, card.quarters), content.copy, content.variables)),
+      /Open the attribution panel/,
+    );
+  });
+
+  test("every card renders at every quarter with nothing blank", () => {
+    for (const card of experiments) {
+      for (let q = 0; q <= card.quarters; q += 1) {
+        const text = textOf(
+          render.renderCard(card, viewFor(card, q), content.copy, content.variables),
+        );
+        assert.ok(!text.includes("undefined"), `${card.id} Q${q}`);
+        assert.ok(!text.includes("NaN"), `${card.id} Q${q}`);
+      }
+    }
   });
 });
