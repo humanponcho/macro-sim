@@ -1,0 +1,78 @@
+{
+  "_comment": "Chrome and control strings. No economics here beyond the labels themselves.",
+  "app": {
+    "title": "Macro-Sim",
+    "subtitle": "How a shock travels through the global economy",
+    "tagline": "A teaching model, not a forecast."
+  },
+  "controls": {
+    "policyRate": {
+      "label": "Policy rate",
+      "help": "You are the central bank. Move the rate and advance a quarter.",
+      "unit": "percent",
+      "min": 0,
+      "max": 12,
+      "step": 0.25,
+      "baseline": 3.5
+    },
+    "energySupplyGap": {
+      "label": "Energy supply shock",
+      "help": "A disruption to physical supply. Positive numbers mean less energy and higher costs.",
+      "unit": "index points",
+      "min": -20,
+      "max": 60,
+      "step": 1,
+      "baseline": 0
+    },
+    "policyMode": {
+      "label": "Who sets the rate?",
+      "options": {
+        "manual": "You are the central bank",
+        "taylor": "The central bank is on a rule"
+      },
+      "help": "On a rule, the bank reacts to expected inflation and growth by itself, and cannot move more than half a point per quarter."
+    }
+  },
+  "actions": {
+    "advance": "Advance a quarter",
+    "back": "Back a quarter",
+    "reset": "Start again",
+    "run": "Run the whole card",
+    "explain": "Why did this move?"
+  },
+  "panels": {
+    "currents": "What the economy is doing now",
+    "expectations": "What markets expect",
+    "pipeline": "What is still in the pipeline",
+    "attribution": "Why did this move?",
+    "map": "Where in the system are we?"
+  },
+  "banners": {
+    "shockQuarter": "Markets have moved. The real economy has not responded yet.",
+    "baseline": "Everything is at its starting level. Set a rate or a supply shock, then advance a quarter.",
+    "offScaleTarget": "This target is beyond the model's limits, so the meter is showing the edge of the scale.",
+    "ruleActive": "You are no longer setting the rate. The rule is."
+  },
+  "labels": {
+    "quarter": "Quarter",
+    "current": "Now",
+    "target": "Heading for",
+    "baseline": "Start",
+    "expected": "Expected",
+    "printed": "Printed",
+    "noChange": "no change",
+    "simulated": "Simulated",
+    "partial": "Partly simulated",
+    "discussed": "Discussed, not simulated"
+  },
+  "explanations": {
+    "target": "Where this would settle if today's drivers never moved again and every delay had finished. The distance between the two is the lag.",
+    "zeroContribution": "This channel exists but contributed nothing this quarter, because it reads an earlier quarter.",
+    "expectationsLead": "Markets price what they expect, not what has been published. That is why shares can move on a day when no figure has changed.",
+    "notSimulated": "The lesson covers this layer, but the model does not compute it. Talk about it instead."
+  },
+  "footer": {
+    "disclaimer": "Teaching magnitudes, chosen to make transmission visible over six to eight quarters. They are not estimates and this is not a forecast.",
+    "outOfScope": "Deliberately left out: fiscal policy, employment, separate countries, property, gold, a yield curve, and random shocks."
+  }
+}

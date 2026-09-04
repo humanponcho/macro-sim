@@ -1,0 +1,44 @@
+{
+  "_comment": "Labels for the 31 links in macrosim_model_v1.json. Keys are link ids. 'label' is the bar label in the attribution panel; 'plain' is the one-line explanation under it.",
+  "links": {
+    "r_to_gexp":      { "label": "Policy rate",          "plain": "A higher rate is expected to slow the economy, so growth expectations are marked down straight away." },
+    "cred_to_gexp":   { "label": "Credit conditions",    "plain": "Easier credit today makes faster growth look more likely." },
+    "supply_to_gexp": { "label": "Energy supply",        "plain": "A supply shock is a tax on activity, so expected growth falls." },
+    "g_to_gexp":      { "label": "Current growth",       "plain": "Expectations start from what the economy is already doing." },
+
+    "pi_to_piexp":     { "label": "Current inflation",   "plain": "People expect roughly what they are already living through." },
+    "supply_to_piexp": { "label": "Energy supply",       "plain": "A supply shock is expected to feed straight into prices." },
+    "gexp_to_piexp":   { "label": "Expected growth",     "plain": "A hotter economy is expected to push prices up." },
+    "r_to_piexp":      { "label": "Policy rate",         "plain": "A central bank willing to raise rates is expected to hold inflation down." },
+
+    "r_to_y":     { "label": "Policy rate",        "plain": "The long rate follows the short rate, but only about seventy percent of the way." },
+    "piexp_to_y": { "label": "Expected inflation", "plain": "Lenders want compensating for the inflation they expect." },
+    "gexp_to_y":  { "label": "Expected growth",    "plain": "Weaker expected growth pulls the long rate back down." },
+
+    "r_to_usd":      { "label": "Policy rate",     "plain": "Higher rates pay investors more to hold the currency." },
+    "gexp_to_usd":   { "label": "Expected growth", "plain": "A stronger economy attracts money; a weaker one repels it." },
+    "supply_to_usd": { "label": "Energy supply",   "plain": "A small safe-haven bid when the physical economy is disrupted." },
+
+    "supply_to_e": { "label": "Supply shock",   "plain": "The shock itself. Exogenous, immediate, and held until it is changed." },
+    "g_to_e":      { "label": "Demand",         "plain": "A growing economy burns more energy, a quarter or two later." },
+    "usd_to_e":    { "label": "Dollar",         "plain": "Energy is priced in dollars, so a stronger dollar makes it cheaper the same quarter." },
+
+    "r_to_cred":   { "label": "Policy rate", "plain": "The main brake. A higher rate tightens lending, starting the quarter after the decision." },
+    "g_to_cred":   { "label": "Growth",      "plain": "Lenders lend more readily into a growing economy." },
+    "usd_to_cred": { "label": "Dollar",      "plain": "A stronger dollar tightens conditions for everyone holding dollar debt." },
+
+    "cred_to_g": { "label": "Credit",   "plain": "The main channel from rates to the real economy. Tighter credit, less spending and investment." },
+    "e_to_g":    { "label": "Energy",   "plain": "Expensive energy is a cost on every producer and a bill for every household." },
+    "eq_to_g":   { "label": "Equities", "plain": "The wealth effect. When portfolios fall, people spend less even if wages have not changed." },
+
+    "pi_ar":     { "label": "Persistence", "plain": "Half of last quarter's inflation gap carries over. Prices have memory, which is why a cost shock fades slowly." },
+    "e_to_pi":   { "label": "Energy",      "plain": "Energy costs reach the shelf from the next quarter onward." },
+    "g_to_pi":   { "label": "Demand",      "plain": "The Phillips channel. A hot economy lifts prices, but only after about three quarters." },
+    "usd_to_pi": { "label": "Dollar",      "plain": "A stronger dollar makes imports cheaper, with a long lag." },
+
+    "y_to_eq":    { "label": "Discount rate",       "plain": "The measuring stick. A higher yield makes future profits worth less today, whatever those profits turn out to be." },
+    "gexp_to_eq": { "label": "Expected profits",    "plain": "Shares are a claim on future profits, so expected growth moves them directly." },
+    "cred_to_eq": { "label": "Credit conditions",   "plain": "Easier credit supports valuations. It carries a one-quarter lag, so it contributes nothing in a shock quarter." },
+    "e_to_eq":    { "label": "Energy costs",        "plain": "Expensive energy eats margins across the market." }
+  }
+}

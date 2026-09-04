@@ -23,7 +23,7 @@ lesson content can safely be written against it.
 
 | Phase | What | State |
 | ----- | ---- | ----- |
-| 0 | Project setup, lesson content extracted from the source documents | Partly done. Setup is in place. Lesson text waits for the frozen snapshot, which now exists. |
+| 0 | Project setup, lesson content extracted from the source documents | **Done** |
 | 1 | Engine port, golden tests, acceptance tests T0–T10, `NaN` guard | **Done** |
 | 2 | Target values, per-link contributions, replay-based step back | **Done** |
 | 3 | The Simulate screen | Not started |
@@ -53,6 +53,10 @@ That runs four suites:
 - **Display.** Enforces spec-14 rounding, proves a minus sign never reaches a
   zero, and proves targets are clamped for display without being changed in the
   snapshot.
+- **Content contract.** Ties `content/` to the engine: every readout has a
+  label, every one of the 31 links has a bar label, every layer places its
+  variables, and every figure quoted in a teacher line is checked against the
+  live engine.
 
 To regenerate the golden files after a deliberate change to the reference
 calculator:
@@ -76,9 +80,19 @@ test/
   engine.acceptance.test.js    T0-T10 from the specification.
   engine.attribution.test.js   Targets, contributions and step back.
   display.format.test.js       The display invariants.
+  content.contract.test.js     Lesson copy against the engine.
   model.coefficients.test.js   Guards against coefficient drift.
   golden/scenarios.json        Scenario tapes, shared by both languages.
   golden/*.csv                 Generated. Do not edit by hand.
+
+content/
+  variables.json     The ten readouts: labels, units, plain English.
+  links.json         Labels for all 31 links, for the attribution panel.
+  layers.json        The ten-layer map, and what each layer does NOT simulate.
+  experiments.json   Four shock cards: tapes, teacher lines, checked figures.
+  glossary.json      Drawer terms, cross-referenced.
+  copy.json          Controls, banners, panel headings.
+  reconciliation.md  The 13-step beginner chain mapped onto L1-L10.
 
 tools/
   generate_golden.py           Drives the oracle, writes the CSVs.
@@ -227,6 +241,26 @@ invariants are enforced once rather than in every component:
 the zeros. A contribution of `0` is a fact, not a missing channel: in the
 quarter of a rate rise, credit contributes exactly nothing to equity, and that
 zero is the lesson.
+
+## Lesson content
+
+Everything a screen says lives in `content/`, keyed to engine ids. No copy is
+hard-coded in a component, and no coefficient appears in the copy.
+
+The content is written to be public. It is derived from the lesson packs, not
+lifted from them, and it carries no teacher key or assessment answers.
+
+The contract suite is what keeps the two halves honest. Rename a link id and the
+attribution panel does not silently render a blank label: the build fails,
+naming the id. Change a coefficient so a teacher line's figure is no longer
+true, and the build fails with both numbers:
+
+```
+hike_held Q1 equity.y_to_eq: card says -3.9, engine says -3.372
+```
+
+That check runs over every figure quoted in `experiments.json`, so a teacher can
+read the card aloud and trust it.
 
 ## Source documents
 

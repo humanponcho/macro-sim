@@ -1,0 +1,125 @@
+{
+  "_comment": "The ten readouts on the Simulate screen. Keys are engine ids. Units must match src/display/format.js.",
+  "variables": {
+    "growth": {
+      "label": "Growth",
+      "short": "Growth",
+      "unit": "percent",
+      "baseline": 2.0,
+      "layer": 5,
+      "masterVariable": 1,
+      "role": "output",
+      "question": "Is the economy producing and spending more, or less?",
+      "plain": "Real output, at an annual rate. The scoreboard for how much the economy is making, not a measure of how well anyone is living.",
+      "lag": "Slow. Rates reach growth only through credit, energy and wealth, and each of those ramps over three quarters."
+    },
+    "inflation": {
+      "label": "Inflation",
+      "short": "Inflation",
+      "unit": "percent",
+      "baseline": 2.0,
+      "layer": 5,
+      "masterVariable": 2,
+      "role": "output",
+      "question": "Are prices rising faster or slower?",
+      "plain": "How fast the general price level is rising, year on year. When prices rise faster than wages, households feel poorer even while the economy grows.",
+      "lag": "Slowest of all. Energy reaches it next quarter, demand waits three, and half of last quarter's gap carries over."
+    },
+    "policyRate": {
+      "label": "Policy rate",
+      "short": "Policy rate",
+      "unit": "percent",
+      "baseline": 3.5,
+      "layer": 7,
+      "masterVariable": 3,
+      "role": "input",
+      "question": "Is the central bank tightening or easing?",
+      "plain": "The price of short-term money, set by the central bank. In this model you set it, unless you hand the job to the rule.",
+      "lag": "None. It is an input. Everything else in the model is a consequence of it."
+    },
+    "treasuryYield": {
+      "label": "Treasury yield",
+      "short": "Yield",
+      "unit": "percent",
+      "baseline": 3.8,
+      "layer": 8,
+      "masterVariable": 4,
+      "role": "output",
+      "question": "What does the market think future rates and inflation will be?",
+      "plain": "The long-term cost of risk-free money, and the measuring stick used to value almost everything else. Yields up means bond prices down.",
+      "lag": "None. It moves in the same quarter as the shock."
+    },
+    "dollar": {
+      "label": "US dollar",
+      "short": "Dollar",
+      "unit": "index",
+      "baseline": 100.0,
+      "layer": 8,
+      "masterVariable": 5,
+      "role": "output",
+      "question": "Is global financial pressure rising or falling?",
+      "plain": "The dollar against everything else, as an index where 100 is the starting point. A stronger dollar makes dollar debts heavier for everyone who owes them.",
+      "lag": "None. It moves in the same quarter as the shock."
+    },
+    "credit": {
+      "label": "Credit conditions",
+      "short": "Credit",
+      "unit": "index",
+      "baseline": 100.0,
+      "layer": 6,
+      "masterVariable": 6,
+      "role": "output",
+      "question": "Is money and credit becoming easier or harder to get?",
+      "plain": "How freely banks and markets are lending, as an index where 100 is neutral and higher is easier. This is the main pipe between the policy rate and the real economy.",
+      "lag": "One quarter before it starts, two before it finishes. This is the lag that makes the whole lesson work."
+    },
+    "energy": {
+      "label": "Energy",
+      "short": "Energy",
+      "unit": "index",
+      "baseline": 100.0,
+      "layer": 2,
+      "masterVariable": 7,
+      "role": "output",
+      "question": "Are physical inputs getting more or less expensive?",
+      "plain": "The cost of energy, as an index where 100 is the starting point. Energy is not one sector among many; it is an input to transport, food, manufacturing and services alike.",
+      "lag": "Split. A supply shock lands immediately. Demand from growth follows a quarter later."
+    },
+    "equity": {
+      "label": "Equity valuations",
+      "short": "Equities",
+      "unit": "index",
+      "baseline": 100.0,
+      "layer": 9,
+      "masterVariable": 8,
+      "role": "output",
+      "question": "Are investors paying a high or a low price for expected profits?",
+      "plain": "What shares are worth, as an index where 100 is the starting valuation. Expected profits over the return investors demand, so it falls when either half moves against it.",
+      "lag": "None, and it is computed last, so the shock quarter already contains the full financial hit."
+    },
+    "gExp": {
+      "label": "Expected growth",
+      "short": "Exp. growth",
+      "unit": "percent",
+      "baseline": 2.0,
+      "layer": 9,
+      "role": "expectation",
+      "pricedAgainst": "growth",
+      "question": "What does the market think growth is about to do?",
+      "plain": "What markets expect growth to be, priced before any figure is published. This is why shares can fall on a day when no economic data has changed.",
+      "lag": "None. It is computed first, before any market is priced."
+    },
+    "piExp": {
+      "label": "Expected inflation",
+      "short": "Exp. inflation",
+      "unit": "percent",
+      "baseline": 2.0,
+      "layer": 9,
+      "role": "expectation",
+      "pricedAgainst": "inflation",
+      "question": "What does the market think inflation is about to do?",
+      "plain": "What markets expect inflation to be. Bond yields price this, not last year's print.",
+      "lag": "None. It is computed first, before any market is priced."
+    }
+  }
+}
