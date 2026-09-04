@@ -50,6 +50,9 @@ That runs four suites:
   reproduces an independent shorter run.
 - **Coefficients.** Asserts that every beta, sign, lag and width in the code
   still matches `macrosim_model_v1.json`.
+- **Display.** Enforces spec-14 rounding, proves a minus sign never reaches a
+  zero, and proves targets are clamped for display without being changed in the
+  snapshot.
 
 To regenerate the golden files after a deliberate change to the reference
 calculator:
@@ -65,10 +68,14 @@ src/engine/
   coefficients.js   All 31 links, baseline, bounds, the Taylor rule.
   engine.js         simulateQuarter(), pure and deterministic.
 
+src/display/
+  format.js         Rounding, signed zero, target clamping, ranking. No economics.
+
 test/
   engine.golden.test.js        JavaScript against the Python oracle.
   engine.acceptance.test.js    T0-T10 from the specification.
   engine.attribution.test.js   Targets, contributions and step back.
+  display.format.test.js       The display invariants.
   model.coefficients.test.js   Guards against coefficient drift.
   golden/scenarios.json        Scenario tapes, shared by both languages.
   golden/*.csv                 Generated. Do not edit by hand.
@@ -183,8 +190,9 @@ the quarter of a rate rise, credit still reads 100 while its target is already
 95.6. Nothing has happened yet, and something certainly will. Hold the same rate
 for eight quarters and the two meet: 94.65 against 94.63.
 
-Targets are not clipped to the bounds. Clamp them for display if you draw a
-meter.
+Targets are not clipped to the bounds. `src/display/format.js` clamps them for
+display and flags when it had to, so an off-scale target reads as off-scale
+rather than as a wrong number.
 
 ### Stepping back
 
@@ -197,6 +205,28 @@ stepBack(tape, currentQuarter)  // === runTape(tape, { quarters: currentQuarter 
 
 The tape is the source of truth. The history arrays stay an implementation
 detail inside `simulateQuarter`.
+
+## Display rules
+
+`src/display/format.js` is the only place that decides how a number reaches a
+reader. It holds no coefficients and does no economics. It exists so three
+invariants are enforced once rather than in every component:
+
+- **Rounding.** Two decimals on percentage variables, one on index variables
+  (spec 14). The engine keeps full floats.
+- **No signed zero.** The engine already normalises an exact `-0`. The formatter
+  catches the other case: a value small enough to round to zero, such as
+  `-0.001`, which `toFixed(2)` renders as `-0.00`. On screen that reads as a
+  fall, and there was no fall.
+- **Clamped targets.** The engine leaves a target unclipped on purpose, because
+  it says what today's drivers are asking for even when the model would not let
+  the current go there. A meter clamps, and `targetIsOffScale()` says when it
+  had to.
+
+`rankContributions()` orders terms by absolute effect, largest first, and keeps
+the zeros. A contribution of `0` is a fact, not a missing channel: in the
+quarter of a rate rise, credit contributes exactly nothing to equity, and that
+zero is the lesson.
 
 ## Source documents
 
