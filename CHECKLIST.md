@@ -14,15 +14,34 @@ Then open http://localhost:8000.
 
 ## Most likely to fail
 
-**The sliders.** Drag the policy rate from 3.50 to 5.00 in one movement. The
-thumb should follow the pointer the whole way and the number beside it should
-count up as you go. If it jumps once and stops, the redraw is destroying the
-input under the pointer again. That is the failure this file exists to catch;
-see the comment in `slider()` in `src/ui/app.js`.
+These two are the only items with no automated coverage at all. Everything else
+on this page is also checked by `npm test`; these are pure browser behaviour,
+so a machine here cannot see them.
 
-**Keyboard focus.** After clicking Advance, press Space. It should advance
-again. Then click into the policy-rate slider and press Space: it must **not**
-advance, because a control has focus.
+### Slider drag
+
+- [ ] Drag the policy rate from 3.50 to 5.00 in **one** movement. The thumb follows the pointer the whole way.
+- [ ] The number beside the slider counts up continuously as you drag, not once at the end.
+- [ ] Release the slider. The rest of the screen is unchanged, because a pending value only affects the next quarter.
+- [ ] Drag the energy supply shock the same way. Same behaviour.
+- [ ] Click a slider, then use the arrow keys. The value steps and the readout follows.
+
+If the thumb jumps once and then stops following the pointer, a redraw is
+destroying the input mid-drag and releasing pointer capture. See the comment in
+`slider()` in `src/ui/app.js`; that is exactly the bug it describes.
+
+### Keyboard focus
+
+- [ ] Click Advance, then press Space. It advances again.
+- [ ] Press Backspace with nothing focused. It steps back a quarter.
+- [ ] Click into the policy-rate slider, then press Space. It must **not** advance.
+- [ ] Open a dropdown, press Space. It must **not** advance.
+- [ ] Open the glossary drawer, click the search box, type a word with a space in it. The space is typed and the quarter does **not** advance.
+
+The guard is one line in the `keydown` handler in `src/ui/app.js`: the key is
+ignored when focus is on an input, a select or a button. The drawer search box
+is the case worth trying, because it is the only place a class would type a
+space on purpose.
 
 ## The hike card
 
