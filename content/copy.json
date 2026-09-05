@@ -69,7 +69,8 @@
     "target": "Where this would settle if today's drivers never moved again and every delay had finished. The distance between the two is the lag.",
     "zeroContribution": "This channel exists but contributed nothing this quarter, because it reads an earlier quarter.",
     "expectationsLead": "Markets price what they expect, not what has been published. That is why shares can move on a day when no figure has changed.",
-    "notSimulated": "The lesson covers this layer, but the model does not compute it. Talk about it instead."
+    "notSimulated": "The lesson covers this layer, but the model does not compute it. Talk about it instead.",
+    "partlySimulated": "The model computes part of this layer, not all of it. The rest is for talking about."
   },
   "footer": {
     "disclaimer": "Teaching magnitudes, chosen to make transmission visible over six to eight quarters. They are not estimates and this is not a forecast.",

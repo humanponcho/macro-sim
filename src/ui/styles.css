@@ -34,10 +34,13 @@ body {
 
 /* --- masthead --- */
 .masthead { display: grid; grid-template-columns: 1fr auto; gap: 0 1rem; align-items: end;
+  grid-template-areas: "title quarter" "subtitle quarter";
   border-bottom: 2px solid var(--ink); padding-bottom: .75rem; }
+.masthead__title { grid-area: title; }
+.masthead__subtitle { grid-area: subtitle; }
 .masthead__title { margin: 0; font-size: 1.9rem; letter-spacing: -.02em; }
 .masthead__subtitle { margin: .1rem 0 0; color: var(--ink-soft); }
-.masthead__quarter { grid-row: 1 / span 2; display: flex; flex-direction: column;
+.masthead__quarter { grid-area: quarter; display: flex; flex-direction: column;
   align-items: flex-end; margin: 0; }
 .masthead__caption { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-faint); }
@@ -151,8 +154,8 @@ body {
 
 @media (max-width: 40rem) {
   .bar { grid-template-columns: 7.5rem 1fr 3.6rem; }
-  .masthead { grid-template-columns: 1fr; }
-  .masthead__quarter { grid-row: auto; align-items: flex-start; }
+  .masthead { grid-template-columns: 1fr; grid-template-areas: "title" "subtitle" "quarter"; }
+  .masthead__quarter { align-items: flex-start; }
 }
 
 /* --- nav --- */

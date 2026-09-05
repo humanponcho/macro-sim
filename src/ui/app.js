@@ -12,6 +12,7 @@ import { buildMap, buildLayerPanel } from "./map.js";
 import { buildGlossary, buildExitTicket } from "./study.js";
 import {
   el,
+  mount,
   renderBanner,
   renderTiles,
   renderExpectations,
@@ -314,7 +315,8 @@ function createApp(content) {
         }
       : null;
 
-    root.replaceChildren(
+    mount(
+      root,
       el("header", { class: "masthead" }, [
         el("h1", { class: "masthead__title", text: copy.app.title }),
         el("p", { class: "masthead__subtitle", text: copy.app.subtitle }),
@@ -455,7 +457,8 @@ function createApp(content) {
 }
 
 loadContent().then(createApp).catch((error) => {
-  document.querySelector("#app").replaceChildren(
+  mount(
+    document.querySelector("#app"),
     el("p", { class: "banner banner--error" }, [
       `The lesson content did not load: ${error.message}. `,
       "Run the app with a server rather than opening the file directly: npm start",

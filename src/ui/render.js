@@ -22,6 +22,20 @@ export function el(tag, attrs = {}, children = []) {
   return node;
 }
 
+/**
+ * Replace everything under `root` with these nodes.
+ *
+ * Node.replaceChildren() turns a null into the literal text "null", so a
+ * screen built from `condition ? panel : null` prints "nullnullnull" between
+ * its panels. el() already filters its own children; this is the same guard
+ * for the one place that calls replaceChildren directly.
+ */
+export function mount(root, ...nodes) {
+  root.replaceChildren(
+    ...nodes.filter((node) => node !== null && node !== undefined && node !== false),
+  );
+}
+
 const sign = (direction) => (direction > 0 ? "up" : direction < 0 ? "down" : "flat");
 
 export function renderBanner(banner) {

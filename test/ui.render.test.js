@@ -39,6 +39,9 @@ class StubNode {
   setAttribute(name, value) { this.attributes[name] = value; }
   addEventListener(name, fn) { this.listeners[name] = fn; }
   append(...nodes) { this.children.push(...nodes); }
+  // The real one stringifies anything that is not a Node, which is exactly
+  // how "null" ended up printed between the panels.
+  replaceChildren(...nodes) { this.children = nodes.map((n) => (n === null ? "null" : n)); }
 }
 
 function installStubDom() {
@@ -493,5 +496,87 @@ describe("the exit ticket renders", () => {
 
     assert.match(textOf(tree), /You do not need to forecast the economy/);
     assert.match(textOf(tree), /Answered 4 of 5/);
+  });
+});
+
+/* --- regressions found on the real page --- */
+
+describe("no panel gap ever prints the word null", () => {
+  // draw() builds the screen as `condition ? panel : null`, and
+  // Node.replaceChildren turns a null into the text "null". The page showed
+  // "nullnullnullnullnullnullnullnullnull" between its panels.
+  test("mount drops null, undefined and false", () => {
+    const root = new StubNode("main");
+
+    render.mount(root, render.el("p", { text: "kept" }), null, undefined, false,
+                 render.el("p", { text: "also kept" }));
+
+    assert.equal(root.children.length, 2);
+    assert.equal(textOf(root), "kept also kept");
+    assert.ok(!textOf(root).includes("null"));
+  });
+
+  test("a screen that is mostly empty panels renders nothing but the real ones", () => {
+    // Quarter zero: every panel below the banner is absent.
+    const root = new StubNode("main");
+    const screen = buildScreen([], {}, content);
+
+    render.mount(
+      root,
+      render.el("h1", { text: "Macro-Sim" }),
+      render.renderBanner(screen.banner),
+      screen.tiles ? render.renderTiles(screen.tiles, content.copy) : null,
+      screen.expectations ? render.renderExpectations(screen.expectations, content.copy) : null,
+      screen.pipeline ? render.renderPipeline(screen.pipeline, content.copy) : null,
+      null, null, null, null,
+      render.el("footer", { text: "note" }),
+    );
+
+    assert.equal(root.children.length, 3, "title, banner and footer only");
+    assert.ok(!textOf(root).includes("null"), textOf(root));
+  });
+});
+
+describe("the omission sentence tells the truth about its own layer", () => {
+  const layers = load("layers.json").layers;
+  const mapContent = { ...content, layers };
+
+  test("a simulated layer never claims the model does not compute it", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const tiles = buildMap(mapContent, hike[0], null);
+    const lie = content.copy.explanations.notSimulated;
+
+    for (const tile of tiles) {
+      if (tile.mode !== "simulated" || !tile.omission) continue;
+      assert.ok(
+        !tile.omission.includes(lie),
+        `L${tile.number} is simulated but says "${lie}"`,
+      );
+    }
+  });
+
+  test("layer 7 names its omissions without denying that it is simulated", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const bank = buildMap(mapContent, hike[0], null).find((t) => t.number === 7);
+
+    assert.equal(bank.mode, "simulated");
+    assert.equal(bank.omission, "Not simulated here: fiscal policy, quantitative easing and bank regulation.");
+  });
+
+  test("a spoken layer still says the model does not compute it", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const trade = buildMap(mapContent, hike[0], null).find((t) => t.number === 4);
+
+    assert.equal(trade.mode, "discussed");
+    assert.match(trade.omission, /the model does not compute it/);
+  });
+
+  test("a partial layer says it is partly computed, not that it is absent", async () => {
+    const { buildMap } = await import("../src/ui/map.js");
+    const labour = buildMap(mapContent, hike[0], null).find((t) => t.number === 5);
+
+    assert.equal(labour.mode, "partial");
+    assert.match(labour.omission, /computes part of this layer/);
+    assert.ok(!labour.omission.includes("does not compute it"));
   });
 });

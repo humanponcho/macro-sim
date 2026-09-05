@@ -160,7 +160,14 @@ export function buildMap(content, snapshot = null, previous = null, selected = n
   });
 }
 
-/** The sentence a spoken or partial layer shows on its tile. */
+/**
+ * The sentence a layer shows about what it leaves out.
+ *
+ * The lead-in has to match the layer, or the map lies in the other direction.
+ * "The model does not compute it" is true of layer 3. Printed on layer 7, which
+ * the model plainly does compute, it is simply false. A simulated layer gets no
+ * lead-in at all: the omission list is already a complete and true statement.
+ */
 export function omissionSentence(layer, content) {
   const omitted = layer.notSimulated ?? [];
   if (omitted.length === 0) return null;
@@ -170,7 +177,15 @@ export function omissionSentence(layer, content) {
       ? omitted[0]
       : `${omitted.slice(0, -1).join(", ")} and ${omitted[omitted.length - 1]}`;
 
-  return `${content.copy.explanations.notSimulated} Not simulated here: ${list}.`;
+  const sentence = `Not simulated here: ${list}.`;
+
+  if (layer.mode === "discussed") {
+    return `${content.copy.explanations.notSimulated} ${sentence}`;
+  }
+  if (layer.mode === "partial") {
+    return `${content.copy.explanations.partlySimulated} ${sentence}`;
+  }
+  return sentence;
 }
 
 /** The panel for a selected layer. */
