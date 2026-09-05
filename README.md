@@ -30,6 +30,12 @@ lesson content can safely be written against it.
 | 4 | The layer map and shock cards | **Done** |
 | 5 | Glossary drawer, card questions, exit ticket | **Done** |
 
+## Teaching with it
+
+[LESSON.md](LESSON.md) is a 20-step script for one 90-minute class, from the
+opening question to the exit ticket. Every figure it quotes is one the model
+actually prints, so you can read the numbers aloud before the class sees them.
+
 ## Before a class
 
 `npm test` verifies the logic and the content against a document stub. It
